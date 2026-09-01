@@ -14,90 +14,204 @@
 
 <body>
 
+<!-- =========================================================
+     LOGIN PROTECTION
+========================================================= -->
+
+<script>
+
+    if (sessionStorage.getItem("waterflow_login") !== "true") {
+        window.location.href = "halaman.html";
+    }
+
+</script>
+
+
 <div class="layout">
 
-    <!-- Sidebar -->
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
     <aside class="sidebar">
 
         <h2>💧 WaterFlow</h2>
 
-        <a class="active" href="index.html">📊 Dashboard</a>
-        <a href="monitoring.html">📈 Monitoring</a>
-        <a href="history.html">📋 History</a>
-        <a href="notification.html">🔔 Notification</a>
-        <a href="settings.html">⚙️ Settings</a>
+        <a class="active" href="index.html">
+            📊 Dashboard
+        </a>
+
+        <a href="monitoring.html">
+            📈 Monitoring
+        </a>
+
+        <a href="history.html">
+            📋 History
+        </a>
+
+        <a href="notification.html">
+            🔔 Notification
+        </a>
+
+        <a href="settings.html">
+            ⚙️ Settings
+        </a>
+
+        <a href="#" onclick="logout()">
+            🚪 Logout
+        </a>
 
     </aside>
 
-    <!-- Content -->
+
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
 
     <main class="content">
 
+        <!-- HEADER -->
+
         <header>
 
-            <h1>📊 Smart Water Flow Monitoring</h1>
+            <h1>
+                📊 Smart Water Flow Monitoring
+            </h1>
 
             <div class="badge">
-                <span id="connection-badge">🟡 CONNECTING</span>
+
+                <span id="connection-badge">
+                    🟡 CONNECTING
+                </span>
+
             </div>
 
         </header>
 
+
+        <!-- =================================================
+             LIVE SCENARIO
+        ================================================== -->
+
         <div class="panel mode-panel">
+
             <div>
-                <h2>⚡ Live Scenario</h2>
-                <p id="scenario-status">Connecting to Supabase...</p>
+
+                <h2>
+                    ⚡ Live Scenario
+                </h2>
+
+                <p id="scenario-status">
+                    Connecting to Supabase...
+                </p>
+
             </div>
+
+
             <div class="mode-controls">
-                <button id="auto-mode" class="mode-button active" type="button">AUTO</button>
-                <button id="realtime-mode" class="mode-button" type="button">REALTIME</button>
+
+                <button
+                    id="auto-mode"
+                    class="mode-button active"
+                    type="button">
+
+                    AUTO
+
+                </button>
+
+
+                <button
+                    id="realtime-mode"
+                    class="mode-button"
+                    type="button">
+
+                    REALTIME
+
+                </button>
+
             </div>
+
         </div>
 
-        <!-- Card -->
+
+        <!-- =================================================
+             MONITORING CARDS
+        ================================================== -->
 
         <div class="cards">
 
+
+            <!-- FLOW RATE -->
+
             <div class="card">
 
-                <h3>💧 Flow Rate</h3>
+                <h3>
+                    💧 Flow Rate
+                </h3>
 
-                <h1 id="flow-rate">0 L/min</h1>
+                <h1 id="flow-rate">
+                    0 L/min
+                </h1>
 
             </div>
 
+
+            <!-- PUMP STATUS -->
+
             <div class="card">
 
-                <h3>🚰 Pump Status</h3>
+                <h3>
+                    🚰 Pump Status
+                </h3>
 
-                <h1 id="status">🔴 OFF</h1>
+                <h1 id="status">
+                    🔴 OFF
+                </h1>
 
             </div>
 
+
+            <!-- TOTAL VOLUME -->
+
             <div class="card">
 
-                <h3>💦 Total Volume</h3>
+                <h3>
+                    💦 Total Volume
+                </h3>
 
-                <h1 id="total-volume">0 Liter</h1>
+                <h1 id="total-volume">
+                    0 Liter
+                </h1>
 
             </div>
 
+
+            <!-- LAST UPDATE -->
+
             <div class="card">
 
-                <h3>🕒 Last Update</h3>
+                <h3>
+                    🕒 Last Update
+                </h3>
 
-                <h3 id="clock">-</h3>
+                <h3 id="clock">
+                    -
+                </h3>
 
             </div>
 
         </div>
 
-        <!-- Notification -->
+
+        <!-- =================================================
+             NOTIFICATION
+        ================================================== -->
 
         <div class="panel">
 
-            <h2>🔔 Notification</h2>
+            <h2>
+                🔔 Notification
+            </h2>
 
             <div id="notification">
 
@@ -107,35 +221,55 @@
 
         </div>
 
-        <!-- Device Status -->
+
+        <!-- =================================================
+             DEVICE STATUS
+        ================================================== -->
 
         <div class="panel">
 
-            <h2>📡 Device Status</h2>
+            <h2>
+                📡 Device Status
+            </h2>
+
 
             <table class="device-table">
 
                 <tr>
 
-                    <td>ESP32</td>
+                    <td>
+                        ESP32
+                    </td>
 
-                    <td id="esp-status">🟢 Online</td>
-
-                </tr>
-
-                <tr>
-
-                    <td>Supabase</td>
-
-                    <td id="db-status">🟢 Connected</td>
+                    <td id="esp-status">
+                        🟢 Online
+                    </td>
 
                 </tr>
 
+
                 <tr>
 
-                    <td>Website</td>
+                    <td>
+                        Supabase
+                    </td>
 
-                    <td>🟢 Online</td>
+                    <td id="db-status">
+                        🟢 Connected
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Website
+                    </td>
+
+                    <td>
+                        🟢 Online
+                    </td>
 
                 </tr>
 
@@ -147,6 +281,77 @@
 
 </div>
 
+
+<!-- =========================================================
+     POPUP AIR MENGALIR
+========================================================= -->
+
+<div
+    id="water-popup"
+    class="water-popup">
+
+
+    <div class="water-popup-box">
+
+
+        <!-- CLOSE -->
+
+        <button
+            id="close-water-popup"
+            class="water-popup-close"
+            type="button">
+
+            ×
+
+        </button>
+
+
+        <!-- ICON -->
+
+        <div class="water-popup-icon">
+
+            💧
+
+        </div>
+
+
+        <!-- TITLE -->
+
+        <h2>
+            Air Mengalir
+        </h2>
+
+
+        <!-- DESCRIPTION -->
+
+        <p>
+
+            Pompa sedang menyala dan
+            aliran air terdeteksi.
+
+        </p>
+
+
+        <!-- BUTTON -->
+
+        <button
+            id="popup-ok"
+            class="water-popup-button"
+            type="button">
+
+            OKE
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="config.js"></script>
@@ -154,6 +359,24 @@
 <script src="common.js"></script>
 
 <script src="supabase.js"></script>
+
+
+<!-- =========================================================
+     LOGOUT
+========================================================= -->
+
+<script>
+
+    function logout() {
+
+        sessionStorage.removeItem("waterflow_login");
+
+        window.location.href = "halaman.html";
+
+    }
+
+</script>
+
 
 </body>
 
