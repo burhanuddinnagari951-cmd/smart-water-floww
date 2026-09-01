@@ -2,691 +2,108 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Water Flow</title>
 
-    <title>login</title><link rel='stylesheet' href='style.css'></head>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-
-            min-height: 100vh;
-
-            font-family:
-                "Segoe UI",
-                Arial,
-                sans-serif;
-
-            background:
-                radial-gradient(
-                    circle at top left,
-                    #1e40af,
-                    transparent 40%
-                ),
-                radial-gradient(
-                    circle at bottom right,
-                    #0369a1,
-                    transparent 40%
-                ),
-                #020617;
-
-            color: white;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            overflow: hidden;
-
-        }
-
-
-        /* =========================
-           BACKGROUND WATER
-        ========================= */
-
-        .water {
-
-            position: fixed;
-
-            width: 700px;
-
-            height: 700px;
-
-            border-radius: 50%;
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(56,189,248,.18),
-                    transparent 65%
-                );
-
-            bottom: -400px;
-
-            left: 50%;
-
-            transform: translateX(-50%);
-
-            animation:
-                waterMove 6s ease-in-out infinite;
-
-        }
-
-        @keyframes waterMove {
-
-            0%,100% {
-
-                transform:
-                    translateX(-50%)
-                    translateY(0);
-
-            }
-
-            50% {
-
-                transform:
-                    translateX(-50%)
-                    translateY(-40px);
-
-            }
-
-        }
-
-
-        /* =========================
-           LOGIN CARD
-        ========================= */
-
-        .login-container {
-
-            position: relative;
-
-            width: 420px;
-
-            max-width: 90%;
-
-            padding: 40px;
-
-            background:
-                rgba(15,23,42,.72);
-
-            border:
-                1px solid
-                rgba(148,163,184,.18);
-
-            border-radius: 24px;
-
-            backdrop-filter: blur(18px);
-
-            -webkit-backdrop-filter: blur(18px);
-
-            box-shadow:
-                0 25px 60px
-                rgba(0,0,0,.45);
-
-            z-index: 2;
-
-        }
-
-
-        /* =========================
-           LOGO
-        ========================= */
-
-        .logo {
-
-            width: 75px;
-
-            height: 75px;
-
-            margin: 0 auto 20px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            border-radius: 22px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #2563eb,
-                    #0ea5e9
-                );
-
-            font-size: 38px;
-
-            box-shadow:
-                0 10px 30px
-                rgba(14,165,233,.35);
-
-        }
-
-
-        /* =========================
-           TITLE
-        ========================= */
-
-        .title {
-
-            text-align: center;
-
-            font-size: 30px;
-
-            font-weight: 700;
-
-            margin-bottom: 8px;
-
-        }
-
-        .title span {
-
-            color: #60a5fa;
-
-        }
-
-        .subtitle {
-
-            text-align: center;
-
-            color: #94a3b8;
-
-            font-size: 14px;
-
-            margin-bottom: 35px;
-
-        }
-
-
-        /* =========================
-           INPUT
-        ========================= */
-
-        .input-group {
-
-            margin-bottom: 20px;
-
-        }
-
-        .input-group label {
-
-            display: block;
-
-            color: #cbd5e1;
-
-            font-size: 14px;
-
-            margin-bottom: 8px;
-
-        }
-
-        .input-wrapper {
-
-            position: relative;
-
-        }
-
-        .input-wrapper span {
-
-            position: absolute;
-
-            left: 14px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            font-size: 18px;
-
-            opacity: .8;
-
-        }
-
-        .input-wrapper input {
-
-            width: 100%;
-
-            padding:
-                14px
-                45px
-                14px
-                45px;
-
-            background:
-                rgba(2,6,23,.65);
-
-            border:
-                1px solid
-                #334155;
-
-            border-radius: 12px;
-
-            color: white;
-
-            font-size: 15px;
-
-            outline: none;
-
-            transition: .25s;
-
-        }
-
-        .input-wrapper input::placeholder {
-
-            color: #64748b;
-
-        }
-
-        .input-wrapper input:focus {
-
-            border-color:
-                #38bdf8;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(56,189,248,.1);
-
-        }
-
-
-        /* =========================
-           PASSWORD BUTTON
-        ========================= */
-
-        .show-password {
-
-            position: absolute;
-
-            right: 14px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            cursor: pointer;
-
-            color: #94a3b8;
-
-            font-size: 17px;
-
-        }
-
-        .show-password:hover {
-
-            color: white;
-
-        }
-
-
-        /* =========================
-           LOGIN BUTTON
-        ========================= */
-
-        .login-button {
-
-            width: 100%;
-
-            padding: 14px;
-
-            margin-top: 8px;
-
-            border: none;
-
-            border-radius: 12px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #2563eb,
-                    #0284c7
-                );
-
-            color: white;
-
-            font-size: 16px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: .25s;
-
-            box-shadow:
-                0 10px 25px
-                rgba(37,99,235,.25);
-
-        }
-
-        .login-button:hover {
-
-            transform:
-                translateY(-2px);
-
-            box-shadow:
-                0 15px 30px
-                rgba(37,99,235,.35);
-
-        }
-
-        .login-button:active {
-
-            transform:
-                translateY(0);
-
-        }
-
-
-        /* =========================
-           MESSAGE
-        ========================= */
-
-        #message {
-
-            min-height: 22px;
-
-            text-align: center;
-
-            margin-top: 18px;
-
-            font-size: 14px;
-
-        }
-
-
-        /* =========================
-           FOOTER
-        ========================= */
-
-        .footer {
-
-            text-align: center;
-
-            margin-top: 30px;
-
-            color: #64748b;
-
-            font-size: 12px;
-
-        }
-
-
-        /* =========================
-           RESPONSIVE
-        ========================= */
-
-        @media (max-width: 500px) {
-
-            .login-container {
-
-                padding: 30px 24px;
-
-            }
-
-            .title {
-
-                font-size: 26px;
-
-            }
-
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
 
-
-<body>
-
-
-    <!-- Background -->
-
-    <div class="water"></div>
-
-
-    <!-- LOGIN -->
+<body class="login-body">
 
     <div class="login-container">
 
+        <div class="login-box">
 
-        <div class="logo">
+            <img src="airnav-logo.png"
+                 alt="AirNav Indonesia"
+                 class="login-airnav-logo">
 
-            💧
+            <div class="login-logo">💧</div>
 
-        </div>
+            <h1>WaterFlow</h1>
 
+            <p class="login-subtitle">
+                Smart Water Flow Monitoring System
+            </p>
 
-        <h1 class="title">
+            <div class="login-input">
 
-            Water<span>Flow</span>
-
-        </h1>
-
-
-        <p class="subtitle">
-
-            Smart Water Flow Monitoring System
-
-        </p>
-
-
-        <form id="loginForm">
-
-
-            <!-- ID -->
-
-            <div class="input-group">
-
-                <label>
-                    ID Pengguna
+                <label for="username">
+                    Username
                 </label>
 
-                <div class="input-wrapper">
-
-                    <span>👤</span>
-
-                    <input
-                        type="text"
-                        id="username"
-                        placeholder="Masukkan ID"
-                        autocomplete="username"
-                        required
-                    >
-
-                </div>
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Masukkan username"
+                >
 
             </div>
 
+            <div class="login-input">
 
-            <!-- PASSWORD -->
-
-            <div class="input-group">
-
-                <label>
+                <label for="password">
                     Password
                 </label>
 
-                <div class="input-wrapper">
-
-                    <span>🔒</span>
-
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Masukkan password"
-                        autocomplete="current-password"
-                        required
-                    >
-
-                    <span
-                        class="show-password"
-                        id="showPassword"
-                        title="Tampilkan password"
-                    >
-                        👁️
-                    </span>
-
-                </div>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Masukkan password"
+                >
 
             </div>
 
-
-            <!-- BUTTON -->
-
-            <button
-                type="submit"
-                class="login-button"
-            >
-
-                🔐 Login ke Dashboard
-
+            <button id="login-button">
+                LOGIN
             </button>
 
-
-            <div id="message"></div>
-
-
-        </form>
-
-
-        <div class="footer">
-
-            © 2026 Smart Water Flow Monitoring
+            <p id="login-message"></p>
 
         </div>
 
-
     </div>
 
+<script>
 
-    <script>
+const loginButton = document.getElementById("login-button");
 
+loginButton.addEventListener("click", function () {
 
-        /* =========================
-           LOGIN
-        ========================= */
+    const username =
+        document.getElementById("username").value.trim();
 
-        document
-            .getElementById("loginForm")
-            .addEventListener(
-                "submit",
-                function(event) {
+    const password =
+        document.getElementById("password").value;
 
-                    event.preventDefault();
+    const message =
+        document.getElementById("login-message");
 
+    /*
+       LOGIN SEMENTARA
+       Bisa kita ganti nanti dengan Supabase Auth
+    */
 
-                    const username =
-                        document
-                        .getElementById("username")
-                        .value
-                        .trim();
+    if (username === "admin" && password === "admin123") {
 
-                    const password =
-                        document
-                        .getElementById("password")
-                        .value;
+        sessionStorage.setItem("waterflow_login", "true");
 
-                    const message =
-                        document
-                        .getElementById("message");
+        window.location.href = "index.html";
 
+    } else {
 
-                    if (
-                        username === "teknisi" &&
-                        password === "12345"
-                    ) {
+        message.textContent =
+            "❌ Username atau password salah.";
 
-                        message.innerHTML =
-                            "✅ Login berhasil...";
+        message.style.color = "#ef4444";
 
-                        message.style.color =
-                            "#22c55e";
+    }
 
+});
 
-                        setTimeout(
-                            function() {
-
-                                window.location.href =
-                                    "./index.html";
-
-                            },
-                            600
-                        );
-
-
-                    } else {
-
-                        message.innerHTML =
-                            "❌ ID atau password salah.";
-
-                        message.style.color =
-                            "#ef4444";
-
-                    }
-
-                }
-            );
-
-
-        /* =========================
-           SHOW PASSWORD
-        ========================= */
-
-        document
-            .getElementById("showPassword")
-            .addEventListener(
-                "click",
-                function() {
-
-                    const password =
-                        document
-                        .getElementById("password");
-
-
-                    if (
-                        password.type ===
-                        "password"
-                    ) {
-
-                        password.type =
-                            "text";
-
-                        this.textContent =
-                            "🙈";
-
-                    } else {
-
-                        password.type =
-                            "password";
-
-                        this.textContent =
-                            "👁️";
-
-                    }
-
-                }
-            );
-
-
-    </script>
-
+</script>
 
 </body>
-
 </html>
