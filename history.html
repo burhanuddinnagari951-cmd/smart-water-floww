@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>History</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <h2>💧 WaterFlow</h2>
+
+        <a href="index.html">📊 Dashboard</a>
+
+        <a href="monitoring.html">
+            📈 Monitoring
+        </a>
+
+        <a class="active" href="history.html">
+            📋 History
+        </a>
+
+        <a href="notification.html">
+            🔔 Notification
+        </a>
+
+        <a href="settings.html">
+            ⚙️ Settings
+        </a>
+
+    </aside>
+
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <header>
+
+            <h1>📋 History</h1>
+
+            <div class="badge" id="connection-status">
+                🟢 ONLINE
+            </div>
+
+        </header>
+
+
+        <div class="panel">
+
+            <h2>📊 History Data Water Flow</h2>
+
+            <p style="margin-bottom:20px;">
+                Data otomatis diambil dari ESP32 melalui Supabase.
+            </p>
+
+
+            <div style="overflow-x:auto;">
+
+                <table id="historyTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>No</th>
+
+                            <th>Time</th>
+
+                            <th>Flow Rate</th>
+
+                            <th>Status</th>
+
+                            <th>Total Volume</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr>
+
+                            <td colspan="5">
+                                Memuat data...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+
+<script>
+
+    // ======================================
+    // SUPABASE
+    // ======================================
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    // ======================================
+    // LOAD HISTORY
+    // ======================================
+
+    async function loadHistory()
+    {
+
+        const { data, error } =
+            await supabaseClient
+
+                .from("waterflow")
+
+                .select(
+                    "flow_rate,status,total_volume,created_at"
+                )
+
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+
+                .limit(100);
+
+
+        if (error)
+        {
+
+            console.error(
+                "Gagal mengambil history:",
+                error
+            );
+
+            document.querySelector(
+                "#historyTable tbody"
+            ).innerHTML = `
+
+                <tr>
+
+                    <td colspan="5">
+                        ❌ Gagal mengambil data
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        renderHistory(data);
+
+    }
+
+
+    // ======================================
+    // TAMPILKAN HISTORY
+    // ======================================
+
+    function renderHistory(data)
+    {
+
+        const tbody =
+            document.querySelector(
+                "#historyTable tbody"
+            );
+
+
+        if (!data || data.length === 0)
+        {
+
+            tbody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="5">
+                        Belum ada data
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        tbody.innerHTML = "";
+
+
+        data.forEach(
+            (item, index) =>
+            {
+
+                const waktu =
+                    new Date(
+                        item.created_at
+                    ).toLocaleString(
+                        "id-ID"
+                    );
+
+
+                const flow =
+                    Number(
+                        item.flow_rate
+                    ) || 0;
+
+
+                const volume =
+                    Number(
+                        item.total_volume
+                    ) || 0;
+
+
+                let statusHTML;
+
+
+                if (
+                    String(
+                        item.status
+                    ).toUpperCase()
+                    === "ON"
+                )
+                {
+
+                    statusHTML =
+                        `<span style="color:#22c55e;">
+                            🟢 ON
+                        </span>`;
+
+                }
+                else
+                {
+
+                    statusHTML =
+                        `<span style="color:#ef4444;">
+                            🔴 OFF
+                        </span>`;
+
+                }
+
+
+                tbody.innerHTML += `
+
+                    <tr>
+
+                        <td>
+                            ${index + 1}
+                        </td>
+
+                        <td>
+                            ${waktu}
+                        </td>
+
+                        <td>
+                            ${flow.toFixed(2)}
+                            L/min
+                        </td>
+
+                        <td>
+                            ${statusHTML}
+                        </td>
+
+                        <td>
+                            ${volume.toFixed(3)}
+                            L
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        );
+
+    }
+
+
+    // ======================================
+    // LOAD DATA PERTAMA
+    // ======================================
+
+    loadHistory();
+
+
+    // ======================================
+    // REALTIME
+    // ======================================
+
+    supabaseClient
+
+        .channel(
+            "history-waterflow"
+        )
+
+        .on(
+
+            "postgres_changes",
+
+            {
+                event: "INSERT",
+
+                schema: "public",
+
+                table: "waterflow"
+
+            },
+
+            payload =>
+            {
+
+                console.log(
+                    "History data baru:",
+                    payload.new
+                );
+
+
+                // Ambil ulang data
+                // agar urutan tetap benar
+
+                loadHistory();
+
+            }
+
+        )
+
+        .subscribe(
+
+            status =>
+            {
+
+                console.log(
+                    "History Realtime:",
+                    status
+                );
+
+
+                const badge =
+                    document.getElementById(
+                        "connection-status"
+                    );
+
+
+                if (
+                    status === "SUBSCRIBED"
+                )
+                {
+
+                    badge.innerHTML =
+                        "🟢 REALTIME";
+
+                }
+
+            }
+
+        );
+
+</script>
+
+</body>
+
+</html>

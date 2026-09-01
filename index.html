@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Water Flow Monitoring</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>💧 WaterFlow</h2>
+
+        <a class="active" href="index.html">📊 Dashboard</a>
+        <a href="monitoring.html">📈 Monitoring</a>
+        <a href="history.html">📋 History</a>
+        <a href="notification.html">🔔 Notification</a>
+        <a href="settings.html">⚙️ Settings</a>
+
+    </aside>
+
+    <!-- Content -->
+
+    <main class="content">
+
+        <header>
+
+            <h1>📊 Smart Water Flow Monitoring</h1>
+
+            <div class="badge">
+                <span id="connection-badge">🟡 CONNECTING</span>
+            </div>
+
+        </header>
+
+        <div class="panel mode-panel">
+            <div>
+                <h2>⚡ Live Scenario</h2>
+                <p id="scenario-status">Connecting to Supabase...</p>
+            </div>
+            <div class="mode-controls">
+                <button id="auto-mode" class="mode-button active" type="button">AUTO</button>
+                <button id="realtime-mode" class="mode-button" type="button">REALTIME</button>
+            </div>
+        </div>
+
+        <!-- Card -->
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>💧 Flow Rate</h3>
+
+                <h1 id="flow-rate">0 L/min</h1>
+
+            </div>
+
+            <div class="card">
+
+                <h3>🚰 Pump Status</h3>
+
+                <h1 id="status">🔴 OFF</h1>
+
+            </div>
+
+            <div class="card">
+
+                <h3>💦 Total Volume</h3>
+
+                <h1 id="total-volume">0 Liter</h1>
+
+            </div>
+
+            <div class="card">
+
+                <h3>🕒 Last Update</h3>
+
+                <h3 id="clock">-</h3>
+
+            </div>
+
+        </div>
+
+        <!-- Notification -->
+
+        <div class="panel">
+
+            <h2>🔔 Notification</h2>
+
+            <div id="notification">
+
+                🔴 Air Tidak Mengalir
+
+            </div>
+
+        </div>
+
+        <!-- Device Status -->
+
+        <div class="panel">
+
+            <h2>📡 Device Status</h2>
+
+            <table class="device-table">
+
+                <tr>
+
+                    <td>ESP32</td>
+
+                    <td id="esp-status">🟢 Online</td>
+
+                </tr>
+
+                <tr>
+
+                    <td>Supabase</td>
+
+                    <td id="db-status">🟢 Connected</td>
+
+                </tr>
+
+                <tr>
+
+                    <td>Website</td>
+
+                    <td>🟢 Online</td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="config.js"></script>
+
+<script src="js/common.js"></script>
+
+<script src="js/supabase.js"></script>
+
+</body>
+
+</html>

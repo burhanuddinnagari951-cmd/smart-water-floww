@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Water Flow Monitoring - AirNav Indonesia</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+
+<body>
+
+<div class="layout">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="airnav-brand">
+
+            <img src="css/img/airnav-logo.png"
+                 alt="AirNav Indonesia">
+
+        </div>
+
+
+        <div class="waterflow-title">
+
+            💧 WaterFlow
+
+        </div>
+
+
+        <div class="menu">
+
+            <a href="index.html">
+                📊 Dashboard
+            </a>
+
+            <a class="active"
+               href="monitoring.html">
+                📈 Monitoring
+            </a>
+
+            <a href="history.html">
+                📋 History
+            </a>
+
+            <a href="notification.html">
+                🔔 Notification
+            </a>
+
+            <a href="settings.html">
+                ⚙️ Settings
+            </a>
+
+        </div>
+
+
+        <div class="sidebar-footer">
+
+            <div>
+                AIRNAV INDONESIA
+            </div>
+
+            <small>
+                Water Flow Monitoring System
+            </small>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ================= CONTENT ================= -->
+
+    <main class="content">
+
+
+        <!-- HEADER -->
+
+        <header class="main-header">
+
+            <div>
+
+                <div class="company-title">
+                    AIRNAV INDONESIA
+                </div>
+
+                <h1>
+                    📈 Water Flow Monitoring
+                </h1>
+
+                <p>
+                    Sistem Monitoring Aliran Air Real-Time
+                </p>
+
+            </div>
+
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    SYSTEM ONLINE
+                </span>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= CARDS ================= -->
+
+        <div class="cards">
+
+
+            <!-- FLOW -->
+
+            <div class="card monitoring-card">
+
+                <div class="card-icon">
+                    💧
+                </div>
+
+                <div>
+
+                    <h3>
+                        Flow Rate
+                    </h3>
+
+                    <h1 id="flow-rate-monitor">
+                        0 L/min
+                    </h1>
+
+                    <span class="card-description">
+                        Debit aliran air
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PUMP -->
+
+            <div class="card monitoring-card">
+
+                <div class="card-icon">
+                    🚰
+                </div>
+
+                <div>
+
+                    <h3>
+                        Pump Status
+                    </h3>
+
+                    <h1 id="pump-status">
+                        🔴 OFF
+                    </h1>
+
+                    <span class="card-description">
+                        Status pompa
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= WATER FLOW ================= -->
+
+        <div class="panel water-panel">
+
+            <div class="panel-title">
+
+                <div>
+
+                    <h2>
+                        💧 Water Flow Animation
+                    </h2>
+
+                    <p>
+                        Visualisasi aliran air dari pompa menuju tangki
+                    </p>
+
+                </div>
+
+
+                <div id="flow-indicator"
+                     class="flow-indicator off">
+
+                    🔴 AIR TIDAK MENGALIR
+
+                </div>
+
+            </div>
+
+
+
+            <div class="pipe-container">
+
+
+                <div class="equipment">
+
+                    <div class="equipment-icon">
+                        🚰
+                    </div>
+
+                    <span>
+                        PUMP
+                    </span>
+
+                </div>
+
+
+                <div class="pipe">
+
+                    <div id="water-animation"
+                         class="water-flow">
+
+                    </div>
+
+                </div>
+
+
+                <div class="equipment">
+
+                    <div class="equipment-icon">
+                        🛢️
+                    </div>
+
+                    <span>
+                        WATER TANK
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= CHART ================= -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+
+                <div>
+
+                    <h2>
+                        📈 Grafik Flow Rate Realtime
+                    </h2>
+
+                    <p>
+                        Monitoring debit air berdasarkan data sensor YF-S201
+                    </p>
+
+                </div>
+
+                <div class="chart-live">
+                    ● LIVE
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <canvas id="flowChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= DEVICE STATUS ================= -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+
+                <div>
+
+                    <h2>
+                        📡 Device Status
+                    </h2>
+
+                    <p>
+                        Status perangkat monitoring
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="device-grid">
+
+
+                <div class="device-box">
+
+                    <div class="device-name">
+                        ESP32
+                    </div>
+
+                    <div id="esp32-status"
+                         class="device-online">
+
+                        🟢 Online
+
+                    </div>
+
+                </div>
+
+
+                <div class="device-box">
+
+                    <div class="device-name">
+                        YF-S201
+                    </div>
+
+                    <div class="device-online">
+
+                        🟢 Connected
+
+                    </div>
+
+                </div>
+
+
+                <div class="device-box">
+
+                    <div class="device-name">
+                        Supabase
+                    </div>
+
+                    <div class="device-online">
+
+                        🟢 Connected
+
+                    </div>
+
+                </div>
+
+
+                <div class="device-box">
+
+                    <div class="device-name">
+                        Website
+                    </div>
+
+                    <div class="device-online">
+
+                        🟢 Online
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- FOOTER -->
+
+        <footer class="dashboard-footer">
+
+            <strong>
+                AirNav Indonesia
+            </strong>
+
+            <span>
+                | Water Flow Monitoring System
+            </span>
+
+        </footer>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- ================= SCRIPT ================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+<script src="js/config.js"></script>
+
+<script src="js/common.js"></script>
+
+<script src="js/supabase.js"></script>
+
+
+<script>
+
+
+/* ==========================================
+   UPDATE WATER FLOW VISUAL
+========================================== */
+
+function updateWaterAnimation(status)
+{
+
+    const water =
+        document.getElementById(
+            "water-animation"
+        );
+
+    const indicator =
+        document.getElementById(
+            "flow-indicator"
+        );
+
+
+    const pump =
+        document.getElementById(
+            "pump-status"
+        );
+
+
+    if (
+        String(status).toUpperCase()
+        === "ON"
+    )
+    {
+
+        water.classList.add("flow-active");
+
+        indicator.classList.remove("off");
+
+        indicator.classList.add("on");
+
+        indicator.innerHTML =
+            "🟢 AIR MENGALIR";
+
+
+        pump.innerHTML =
+            "🟢 ON";
+
+        pump.style.color =
+            "#22c55e";
+
+    }
+
+    else
+    {
+
+        water.classList.remove("flow-active");
+
+        indicator.classList.remove("on");
+
+        indicator.classList.add("off");
+
+        indicator.innerHTML =
+            "🔴 AIR TIDAK MENGALIR";
+
+
+        pump.innerHTML =
+            "🔴 OFF";
+
+        pump.style.color =
+            "#ef4444";
+
+    }
+
+}
+
+
+/* ==========================================
+   MONITORING DATA
+========================================== */
+
+async function updateMonitoring()
+{
+
+    const { data, error } =
+        await supabaseClient
+
+            .from("waterflow")
+
+            .select(
+                "flow_rate,status"
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+
+            .limit(1);
+
+
+    if (error)
+    {
+
+        console.error(
+            "Monitoring error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    )
+    {
+
+        return;
+
+    }
+
+
+    const row = data[0];
+
+
+    /* Flow Rate */
+
+    const flow =
+        Number(
+            row.flow_rate
+        ) || 0;
+
+
+    document.getElementById(
+        "flow-rate-monitor"
+    ).textContent =
+        flow.toFixed(2)
+        + " L/min";
+
+
+    /* Status */
+
+    updateWaterAnimation(
+        row.status
+    );
+
+}
+
+
+/* ==========================================
+   LOAD PERTAMA
+========================================== */
+
+updateMonitoring();
+
+
+/* ==========================================
+   REALTIME SUPABASE
+========================================== */
+
+supabaseClient
+
+    .channel(
+        "monitoring-waterflow"
+    )
+
+    .on(
+
+        "postgres_changes",
+
+        {
+
+            event: "INSERT",
+
+            schema: "public",
+
+            table: "waterflow"
+
+        },
+
+        payload =>
+        {
+
+            console.log(
+                "Data realtime:",
+                payload.new
+            );
+
+
+            const row =
+                payload.new;
+
+
+            const flow =
+                Number(
+                    row.flow_rate
+                ) || 0;
+
+
+            document.getElementById(
+                "flow-rate-monitor"
+            ).textContent =
+                flow.toFixed(2)
+                + " L/min";
+
+
+            updateWaterAnimation(
+                row.status
+            );
+
+        }
+
+    )
+
+    .subscribe(
+
+        status =>
+        {
+
+            console.log(
+                "Realtime status:",
+                status
+            );
+
+        }
+
+    );
+
+</script>
+
+
+</body>
+
+</html>
