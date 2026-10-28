@@ -173,17 +173,34 @@ let isLoading = false;
 
 
 // =========================================
-// FORMAT WAKTU WIB
+// FORMAT WAKTU WIB (UTC+7)
 // =========================================
 
 function formatWaktu(timestamp) {
     if (!timestamp) return "-";
 
-    const date = new Date(timestamp);
+    /*
+       Supabase menyimpan timestamp dalam UTC.
+       Date akan membaca timestamp berzona waktu sebagai
+       waktu absolut, kemudian ditampilkan dalam zona WIB.
+    */
+
+    let date;
+
+    // Jika timestamp tidak memiliki penanda zona waktu,
+    // perlakukan nilainya sebagai UTC.
+    if (
+        typeof timestamp === "string" &&
+        !/(Z|[+-]\d{2}:\d{2})$/i.test(timestamp)
+    ) {
+        date = new Date(timestamp.replace(" ", "T") + "Z");
+    } else {
+        date = new Date(timestamp);
+    }
 
     if (isNaN(date.getTime())) return "-";
 
-    return date.toLocaleString("id-ID", {
+    return new Intl.DateTimeFormat("id-ID", {
         timeZone: "Asia/Jakarta",
         day: "2-digit",
         month: "2-digit",
@@ -192,7 +209,7 @@ function formatWaktu(timestamp) {
         minute: "2-digit",
         second: "2-digit",
         hour12: false
-    });
+    }).format(date);
 }
 
 
@@ -254,7 +271,7 @@ function formatStatusDeteksi(status) {
 
 
 // =========================================
-// MEMUAT DATA HISTORY
+// MEMUAT DATA HISTORY DARI SUPABASE
 // =========================================
 
 async function loadHistory() {
@@ -288,135 +305,3 @@ async function loadHistory() {
         connectionBadge.textContent = "🟢 TERHUBUNG";
 
         document.getElementById("last-updated").textContent =
-            "Diperbarui: " + formatWaktu(new Date().toISOString());
-
-    } catch (error) {
-
-        console.error("Gagal mengambil history:", error);
-
-        connectionBadge.textContent = "🔴 GAGAL MEMUAT";
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center;">
-                    ❌ Gagal mengambil data dari Supabase.
-                    Periksa koneksi internet, config.js,
-                    dan struktur kolom database.
-                </td>
-            </tr>
-        `;
-
-    } finally {
-
-        isLoading = false;
-        refreshButton.disabled = false;
-        refreshButton.textContent = "🔄 Muat Ulang Data";
-
-    }
-}
-
-
-// =========================================
-// MENAMPILKAN DATA HISTORY
-// =========================================
-
-function renderHistory(data) {
-
-    if (!data || data.length === 0) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center;">
-                    Belum ada data riwayat.
-                </td>
-            </tr>
-        `;
-
-        document.getElementById("total-records").textContent = "0";
-        document.getElementById("latest-status").textContent = "-";
-        document.getElementById("latest-leak-status").textContent = "-";
-
-        return;
-    }
-
-    document.getElementById("total-records").textContent = data.length;
-
-    document.getElementById("latest-status").textContent =
-        String(data[0].status || "OFF").toUpperCase();
-
-    const latestLeakStatus =
-        String(data[0].leak_status || "NORMAL").toUpperCase();
-
-    const leakLabels = {
-        NORMAL: "Normal",
-        INDIKASI_KEBOCORAN: "Indikasi Kebocoran",
-        PERIKSA_VOLUME: "Periksa Volume"
-    };
-
-    document.getElementById("latest-leak-status").textContent =
-        leakLabels[latestLeakStatus] || latestLeakStatus;
-
-    tbody.innerHTML = "";
-
-    data.forEach((item, index) => {
-
-        const flow = Number(item.flow_rate) || 0;
-        const volume = Number(item.total_volume) || 0;
-        const duration = Number(item.continuous_flow_seconds) || 0;
-
-        const row = document.createElement("tr");
-
-        const values = [
-            index + 1,
-            formatWaktu(item.created_at),
-            flow.toFixed(2) + " L/min",
-            null,
-            volume.toFixed(3) + " L",
-            null,
-            formatDurasi(duration)
-        ];
-
-        values.forEach((value, columnIndex) => {
-
-            const cell = document.createElement("td");
-
-            if (columnIndex === 3) {
-                cell.innerHTML = formatStatusAliran(item.status);
-            } else if (columnIndex === 5) {
-                cell.innerHTML = formatStatusDeteksi(item.leak_status);
-            } else {
-                cell.textContent = value;
-            }
-
-            row.appendChild(cell);
-
-        });
-
-        tbody.appendChild(row);
-
-    });
-
-}
-
-
-// =========================================
-// LOAD PERTAMA SAAT HALAMAN DIBUKA
-// =========================================
-
-loadHistory();
-
-
-// =========================================
-// REFRESH OTOMATIS SETIAP 1 JAM
-// =========================================
-
-// 60 menit x 60 detik x 1000 milidetik
-setInterval(() => {
-    loadHistory();
-}, 60 * 60 * 1000);
-
-</script>
-
-</body>
-</html>
-```
