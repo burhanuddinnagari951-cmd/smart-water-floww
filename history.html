@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -89,7 +89,7 @@
 
             </div>
 
-            <!-- TOMBOL REFRESH MANUAL -->
+            <!-- TOMBOL REFRESH -->
             <div style="margin-bottom: 15px;">
 
                 <button
@@ -151,15 +151,16 @@
 
 </div>
 
-<!-- SUPABASE -->
+<!-- LIBRARY SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- KONFIGURASI SUPABASE -->
 <script src="config.js"></script>
 
 <script>
-
-// =========================================
+// ========================================
 // INISIALISASI SUPABASE
-// =========================================
+// ========================================
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -172,23 +173,15 @@ const connectionBadge = document.getElementById("connection-status");
 let isLoading = false;
 
 
-// =========================================
-// FORMAT WAKTU WIB (UTC+7)
-// =========================================
+// ========================================
+// FORMAT WAKTU WIB
+// ========================================
 
 function formatWaktu(timestamp) {
     if (!timestamp) return "-";
 
-    /*
-       Supabase menyimpan timestamp dalam UTC.
-       Date akan membaca timestamp berzona waktu sebagai
-       waktu absolut, kemudian ditampilkan dalam zona WIB.
-    */
-
     let date;
 
-    // Jika timestamp tidak memiliki penanda zona waktu,
-    // perlakukan nilainya sebagai UTC.
     if (
         typeof timestamp === "string" &&
         !/(Z|[+-]\d{2}:\d{2})$/i.test(timestamp)
@@ -213,9 +206,9 @@ function formatWaktu(timestamp) {
 }
 
 
-// =========================================
-// FORMAT DURASI
-// =========================================
+// ========================================
+// FORMAT DURASI ALIRAN
+// ========================================
 
 function formatDurasi(seconds) {
     const totalSeconds = Math.max(0, Number(seconds) || 0);
@@ -236,88 +229,43 @@ function formatDurasi(seconds) {
 }
 
 
-// =========================================
+// ========================================
 // FORMAT STATUS ALIRAN
-// =========================================
+// ========================================
 
 function formatStatusAliran(status) {
     const value = String(status || "OFF").toUpperCase();
 
     if (value === "ON") {
-        return `<span style="color:#22c55e;font-weight:bold;">🟢 ON</span>`;
+        return '<span style="color:#22c55e;font-weight:bold;">🟢 ON</span>';
     }
 
-    return `<span style="color:#ef4444;font-weight:bold;">🔴 OFF</span>`;
+    return '<span style="color:#ef4444;font-weight:bold;">🔴 OFF</span>';
 }
 
 
-// =========================================
+// ========================================
 // FORMAT STATUS DETEKSI
-// =========================================
+// ========================================
 
 function formatStatusDeteksi(status) {
     const value = String(status || "NORMAL").toUpperCase();
 
     if (value === "INDIKASI_KEBOCORAN") {
-        return `<span style="color:#ef4444;font-weight:bold;">⚠️ Indikasi Kebocoran</span>`;
+        return '<span style="color:#ef4444;font-weight:bold;">⚠️ Indikasi Kebocoran</span>';
     }
 
     if (value === "PERIKSA_VOLUME") {
-        return `<span style="color:#f59e0b;font-weight:bold;">⚠️ Periksa Volume</span>`;
+        return '<span style="color:#f59e0b;font-weight:bold;">⚠️ Periksa Volume</span>';
     }
 
-    return `<span style="color:#22c55e;font-weight:bold;">✅ Normal</span>`;
+    return '<span style="color:#22c55e;font-weight:bold;">✅ Normal</span>';
 }
 
 
-// =========================================
-// MEMUAT DATA HISTORY DARI SUPABASE
-// =========================================
-
-
-async function loadHistory() {
-    if (isLoading) return;
-
-    isLoading = true;
-
-    const refreshButton = document.getElementById("refresh-button");
-    refreshButton.disabled = true;
-    refreshButton.textContent = "⏳ Memuat...";
-    connectionBadge.textContent = "🟡 MEMUAT DATA...";
-
-    try {
-        const { data, error } = await supabaseClient
-            .from("waterflow")
-            .select("flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at")
-            .order("created_at", { ascending: false })
-            .limit(100);
-
-        if (error) throw error;
-
-        renderHistory(data || []);
-
-        connectionBadge.textContent = "🟢 TERHUBUNG";
-        document.getElementById("last-updated").textContent =
-            "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
-
-    } catch (error) {
-        console.error("Gagal memuat History:", error);
-
-        connectionBadge.textContent = "🔴 GAGAL MEMUAT";
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center;">
-                    Gagal memuat data. Periksa Console browser.
-                </td>
-            </tr>
-        `;
-    } finally {
-        isLoading = false;
-        refreshButton.disabled = false;
-        refreshButton.textContent = "🔄 Muat Ulang Data";
-    }
-}
+// ========================================
+// MENAMPILKAN DATA HISTORY
+// ========================================
 
 function renderHistory(data) {
     document.getElementById("total-records").textContent = data.length;
@@ -348,18 +296,93 @@ function renderHistory(data) {
             <td>${formatWaktu(item.created_at)}</td>
             <td>${Number(item.flow_rate || 0).toFixed(2)} L/min</td>
             <td>${formatStatusAliran(item.status)}</td>
-            <td>${Number(item.total_volume || 0).toFixed(3)}</td>
+            <td>${Number(item.total_volume || 0).toFixed(3)} L</td>
             <td>${formatStatusDeteksi(item.leak_status)}</td>
             <td>${formatDurasi(item.continuous_flow_seconds)}</td>
         </tr>
     `).join("");
 }
 
-// Muat data saat halaman dibuka
-loadHistory();
 
-// Muat ulang otomatis setiap satu jam
-setInterval(loadHistory, 60 * 60 * 1000);
+// ========================================
+// MEMUAT DATA DARI SUPABASE
+// ========================================
 
+async function loadHistory() {
+    if (isLoading) return;
+
+    isLoading = true;
+
+    const refreshButton = document.getElementById("refresh-button");
+
+    refreshButton.disabled = true;
+    refreshButton.textContent = "⏳ Memuat...";
+    connectionBadge.textContent = "🟡 MEMUAT DATA...";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("waterflow")
+            .select(
+                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
+            )
+            .order("created_at", { ascending: false })
+            .limit(100);
+
+        if (error) throw error;
+
+        renderHistory(data || []);
+
+        connectionBadge.textContent = "🟢 TERHUBUNG";
 
         document.getElementById("last-updated").textContent =
+            "Terakhir diperbarui: " +
+            new Intl.DateTimeFormat("id-ID", {
+                timeZone: "Asia/Jakarta",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false
+            }).format(new Date());
+
+    } catch (error) {
+        console.error("Gagal memuat History:", error);
+
+        connectionBadge.textContent = "🔴 GAGAL MEMUAT";
+
+        document.getElementById("last-updated").textContent =
+            "Pembaruan gagal";
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;">
+                    Gagal memuat data dari Supabase.
+                    Periksa Console browser untuk detail error.
+                </td>
+            </tr>
+        `;
+
+    } finally {
+        isLoading = false;
+        refreshButton.disabled = false;
+        refreshButton.textContent = "🔄 Muat Ulang Data";
+    }
+}
+
+
+// ========================================
+// JALANKAN SAAT HALAMAN DIBUKA
+// ========================================
+
+loadHistory();
+
+
+// ========================================
+// REFRESH OTOMATIS SETIAP 1 JAM
+// ========================================
+
+setInterval(loadHistory, 60 * 60 * 1000);
+
+</script>
+
+</body>
+</html>
