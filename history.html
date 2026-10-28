@@ -274,34 +274,92 @@ function formatStatusDeteksi(status) {
 // MEMUAT DATA HISTORY DARI SUPABASE
 // =========================================
 
-async function loadHistory() {
 
+async function loadHistory() {
     if (isLoading) return;
 
     isLoading = true;
 
     const refreshButton = document.getElementById("refresh-button");
-
     refreshButton.disabled = true;
     refreshButton.textContent = "⏳ Memuat...";
     connectionBadge.textContent = "🟡 MEMUAT DATA...";
 
     try {
-
         const { data, error } = await supabaseClient
             .from("waterflow")
-            .select(
-                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
-            )
+            .select("flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at")
             .order("created_at", { ascending: false })
             .limit(100);
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
         renderHistory(data || []);
 
         connectionBadge.textContent = "🟢 TERHUBUNG";
+        document.getElementById("last-updated").textContent =
+            "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
+
+    } catch (error) {
+        console.error("Gagal memuat History:", error);
+
+        connectionBadge.textContent = "🔴 GAGAL MEMUAT";
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;">
+                    Gagal memuat data. Periksa Console browser.
+                </td>
+            </tr>
+        `;
+    } finally {
+        isLoading = false;
+        refreshButton.disabled = false;
+        refreshButton.textContent = "🔄 Muat Ulang Data";
+    }
+}
+
+function renderHistory(data) {
+    document.getElementById("total-records").textContent = data.length;
+
+    if (data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;">
+                    Belum ada data pada tabel waterflow.
+                </td>
+            </tr>
+        `;
+
+        document.getElementById("latest-status").textContent = "-";
+        document.getElementById("latest-leak-status").textContent = "-";
+        return;
+    }
+
+    document.getElementById("latest-status").textContent =
+        data[0].status || "OFF";
+
+    document.getElementById("latest-leak-status").textContent =
+        data[0].leak_status || "NORMAL";
+
+    tbody.innerHTML = data.map((item, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${formatWaktu(item.created_at)}</td>
+            <td>${Number(item.flow_rate || 0).toFixed(2)} L/min</td>
+            <td>${formatStatusAliran(item.status)}</td>
+            <td>${Number(item.total_volume || 0).toFixed(3)}</td>
+            <td>${formatStatusDeteksi(item.leak_status)}</td>
+            <td>${formatDurasi(item.continuous_flow_seconds)}</td>
+        </tr>
+    `).join("");
+}
+
+// Muat data saat halaman dibuka
+loadHistory();
+
+// Muat ulang otomatis setiap satu jam
+setInterval(loadHistory, 60 * 60 * 1000);
+
 
         document.getElementById("last-updated").textContent =
