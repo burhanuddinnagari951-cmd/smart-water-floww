@@ -1,658 +1,588 @@
+
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Water Flow Monitoring - AirNav Indonesia</title>
 
     <link rel="stylesheet" href="style.css">
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
-
 
 <body>
 
 <div class="layout">
 
-
-    <!-- ================= SIDEBAR ================= -->
-
+    <!-- SIDEBAR -->
     <aside class="sidebar">
 
         <div class="airnav-brand">
-
-            <img src="airnav-logo.png"
-                 alt="AirNav Indonesia">
-
+            <img src="airnav-logo.png" alt="AirNav Indonesia">
         </div>
-
 
         <div class="waterflow-title">
-
             💧 WaterFlow
-
         </div>
-
 
         <div class="menu">
-
-            <a href="index.html">
-                📊 Dashboard
-            </a>
-
-            <a class="active"
-               href="monitoring.html">
-                📈 Monitoring
-            </a>
-
-            <a href="history.html">
-                📋 History
-            </a>
-
-            <a href="notification.html">
-                🔔 Notification
-            </a>
-
-            <a href="settings.html">
-                ⚙️ Settings
-            </a>
-
+            <a href="index.html">📊 Dashboard</a>
+            <a class="active" href="monitoring.html">📈 Monitoring</a>
+            <a href="history.html">📋 History</a>
+            <a href="notification.html">🔔 Notification</a>
+            <a href="settings.html">⚙️ Settings</a>
         </div>
 
-
         <div class="sidebar-footer">
-
-            <div>
-                AIRNAV INDONESIA
-            </div>
-
-            <small>
-                Water Flow Monitoring System
-            </small>
-
+            <div>AIRNAV INDONESIA</div>
+            <small>Water Flow Monitoring System</small>
         </div>
 
     </aside>
 
-
-
-    <!-- ================= CONTENT ================= -->
-
+    <!-- CONTENT -->
     <main class="content">
 
-
         <!-- HEADER -->
-
         <header class="main-header">
 
             <div>
+                <div class="company-title">AIRNAV INDONESIA</div>
 
-                <div class="company-title">
-                    AIRNAV INDONESIA
-                </div>
+                <h1>📈 Water Flow Monitoring</h1>
 
-                <h1>
-                    📈 Water Flow Monitoring
-                </h1>
-
-                <p>
-                    Sistem Monitoring Aliran Air Real-Time
-                </p>
-
+                <p>Sistem Monitoring Aliran Air Real-Time</p>
             </div>
 
-
             <div class="system-status">
-
                 <span class="status-dot"></span>
-
-                <span>
-                    SYSTEM ONLINE
-                </span>
-
+                <span>SYSTEM ONLINE</span>
             </div>
 
         </header>
 
-
-
-        <!-- ================= CARDS ================= -->
-
+        <!-- FLOW RATE DAN STATUS -->
         <div class="cards">
 
-
-            <!-- FLOW -->
-
             <div class="card monitoring-card">
-
-                <div class="card-icon">
-                    💧
-                </div>
+                <div class="card-icon">💧</div>
 
                 <div>
+                    <h3>Flow Rate</h3>
 
-                    <h3>
-                        Flow Rate
-                    </h3>
-
-                    <h1 id="flow-rate-monitor">
-                        0 L/min
-                    </h1>
+                    <h1 id="flow-rate-monitor">0 L/min</h1>
 
                     <span class="card-description">
                         Debit aliran air
                     </span>
-
                 </div>
-
             </div>
 
-
-
-            <!-- PUMP -->
-
             <div class="card monitoring-card">
-
-                <div class="card-icon">
-                    🚰
-                </div>
+                <div class="card-icon">🚰</div>
 
                 <div>
+                    <h3>Pump Status</h3>
 
-                    <h3>
-                        Pump Status
-                    </h3>
-
-                    <h1 id="pump-status">
+                    <h1 id="pump-status" style="color:#ef4444;">
                         🔴 OFF
                     </h1>
 
                     <span class="card-description">
-                        Status pompa
+                        Status aliran berdasarkan sensor
                     </span>
-
                 </div>
-
             </div>
 
         </div>
 
-
-
-        <!-- ================= WATER FLOW ================= -->
-
-        <div class="panel water-panel">
-
-            <div class="panel-title">
-
-                <div>
-
-                    <h2>
-                        💧 Water Flow Animation
-                    </h2>
-
-                    <p>
-                        Visualisasi aliran air dari pompa menuju tangki
-                    </p>
-
-                </div>
-
-
-                <div id="flow-indicator"
-                     class="flow-indicator off">
-
-                    🔴 AIR TIDAK MENGALIR
-
-                </div>
-
-            </div>
-
-
-
-            <div class="pipe-container">
-
-
-                <div class="equipment">
-
-                    <div class="equipment-icon">
-                        🚰
-                    </div>
-
-                    <span>
-                        PUMP
-                    </span>
-
-                </div>
-
-
-                <div class="pipe">
-
-                    <div id="water-animation"
-                         class="water-flow">
-
-                    </div>
-
-                </div>
-
-
-                <div class="equipment">
-
-                    <div class="equipment-icon">
-                        🛢️
-                    </div>
-
-                    <span>
-                        WATER TANK
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================= CHART ================= -->
-
+        <!-- DETEKSI INDIKASI KEBOCORAN -->
         <div class="panel">
 
             <div class="panel-title">
-
                 <div>
-
-                    <h2>
-                        📈 Grafik Flow Rate Realtime
-                    </h2>
+                    <h2>🚨 Deteksi Indikasi Kebocoran</h2>
 
                     <p>
-                        Monitoring debit air berdasarkan data sensor YF-S201
+                        Pemantauan aliran air dan volume harian
+                        dengan batas peringatan 500 liter
                     </p>
-
                 </div>
-
-                <div class="chart-live">
-                    ● LIVE
-                </div>
-
             </div>
-
-
-            <div class="chart-container">
-
-                <canvas id="flowChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================= DEVICE STATUS ================= -->
-
-        <div class="panel">
-
-            <div class="panel-title">
-
-                <div>
-
-                    <h2>
-                        📡 Device Status
-                    </h2>
-
-                    <p>
-                        Status perangkat monitoring
-                    </p>
-
-                </div>
-
-            </div>
-
 
             <div class="device-grid">
 
-
                 <div class="device-box">
-
                     <div class="device-name">
-                        ESP32
+                        Status Deteksi
                     </div>
 
-                    <div id="esp32-status"
-                         class="device-online">
-
-                        🟢 Online
-
+                    <div id="leak-status"
+                         style="font-weight:bold;color:#64748b;">
+                        ⏳ MENUNGGU DATA
                     </div>
-
                 </div>
 
-
                 <div class="device-box">
-
                     <div class="device-name">
-                        YF-S201
+                        Durasi Aliran Terus-Menerus
                     </div>
 
-                    <div class="device-online">
-
-                        🟢 Connected
-
+                    <div id="continuous-flow-duration"
+                         style="font-weight:bold;">
+                        0 detik
                     </div>
-
                 </div>
 
-
                 <div class="device-box">
-
                     <div class="device-name">
-                        Supabase
+                        Volume Harian
                     </div>
 
-                    <div class="device-online">
-
-                        🟢 Connected
-
+                    <div id="daily-volume"
+                         style="font-weight:bold;">
+                        0.000 L
                     </div>
-
                 </div>
 
+            </div>
 
-                <div class="device-box">
+            <div id="leak-message"
+                 style="margin-top:18px;padding:14px;border-radius:8px;background:#f1f5f9;color:#334155;">
+                Menunggu data deteksi dari ESP32.
+            </div>
 
-                    <div class="device-name">
-                        Website
-                    </div>
+            <p style="margin-top:12px;font-size:13px;color:#64748b;">
+                Catatan: Peringatan merupakan indikasi awal,
+                bukan bukti pasti kebocoran. Aliran terus-menerus
+                juga dapat disebabkan oleh pengisian tandon normal.
+            </p>
 
-                    <div class="device-online">
+        </div>
 
-                        🟢 Online
+        <!-- VISUALISASI ALIRAN AIR -->
+        <div class="panel water-panel">
 
-                    </div>
+            <div class="panel-title">
+                <div>
+                    <h2>💧 Water Flow Animation</h2>
 
+                    <p>
+                        Visualisasi aliran air dari pipa masuk menuju tangki
+                    </p>
+                </div>
+
+                <div id="flow-indicator" class="flow-indicator off">
+                    🔴 AIR TIDAK MENGALIR
+                </div>
+            </div>
+
+            <div class="pipe-container">
+
+                <div class="equipment">
+                    <div class="equipment-icon">🚰</div>
+                    <span>INLET</span>
+                </div>
+
+                <div class="pipe">
+                    <div id="water-animation" class="water-flow"></div>
+                </div>
+
+                <div class="equipment">
+                    <div class="equipment-icon">🛢️</div>
+                    <span>WATER TANK</span>
                 </div>
 
             </div>
 
         </div>
 
+        <!-- GRAFIK FLOW RATE -->
+        <div class="panel">
 
+            <div class="panel-title">
+                <div>
+                    <h2>📈 Grafik Flow Rate Realtime</h2>
+
+                    <p>
+                        Monitoring debit air berdasarkan sensor YF-S201
+                    </p>
+                </div>
+
+                <div class="chart-live">● LIVE</div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="flowChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- STATUS PERANGKAT -->
+        <div class="panel">
+
+            <div class="panel-title">
+                <div>
+                    <h2>📡 Device Status</h2>
+                    <p>Status perangkat monitoring</p>
+                </div>
+            </div>
+
+            <div class="device-grid">
+
+                <div class="device-box">
+                    <div class="device-name">ESP32</div>
+
+                    <div id="esp32-status" class="device-online">
+                        ⏳ Memeriksa koneksi
+                    </div>
+                </div>
+
+                <div class="device-box">
+                    <div class="device-name">YF-S201</div>
+
+                    <div class="device-online">
+                        🟢 Connected
+                    </div>
+                </div>
+
+                <div class="device-box">
+                    <div class="device-name">Supabase</div>
+
+                    <div id="supabase-status" class="device-online">
+                        ⏳ Memeriksa koneksi
+                    </div>
+                </div>
+
+                <div class="device-box">
+                    <div class="device-name">Website</div>
+
+                    <div class="device-online">
+                        🟢 Online
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
 
         <!-- FOOTER -->
-
         <footer class="dashboard-footer">
-
-            <strong>
-                AirNav Indonesia
-            </strong>
-
-            <span>
-                | Water Flow Monitoring System
-            </span>
-
+            <strong>AirNav Indonesia</strong>
+            <span>| Water Flow Monitoring System</span>
         </footer>
-
 
     </main>
 
 </div>
 
-
-
-<!-- ================= SCRIPT ================= -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-</script>
-
+<!-- LIBRARY DAN KONFIGURASI -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
 <script src="common.js"></script>
-
 <script src="supabase.js"></script>
-
 
 <script>
 
-
 /* ==========================================
-   UPDATE WATER FLOW VISUAL
+   KONFIGURASI TAMPILAN
 ========================================== */
 
-function updateWaterAnimation(status)
-{
+const FLOW_WARNING_SECONDS = 300;
+const DAILY_VOLUME_LIMIT = 500;
 
-    const water =
-        document.getElementById(
-            "water-animation"
-        );
+let lastReceivedAt = null;
 
-    const indicator =
-        document.getElementById(
-            "flow-indicator"
-        );
+/* ==========================================
+   ANIMASI ALIRAN AIR
+========================================== */
 
+function updateWaterAnimation(status) {
 
-    const pump =
-        document.getElementById(
-            "pump-status"
-        );
+    const water = document.getElementById("water-animation");
+    const indicator = document.getElementById("flow-indicator");
+    const pump = document.getElementById("pump-status");
 
+    const isFlowing = String(status).toUpperCase() === "ON";
 
-    if (
-        String(status).toUpperCase()
-        === "ON"
-    )
-    {
+    if (isFlowing) {
 
         water.classList.add("flow-active");
 
         indicator.classList.remove("off");
-
         indicator.classList.add("on");
+        indicator.textContent = "🟢 AIR MENGALIR";
 
-        indicator.innerHTML =
-            "🟢 AIR MENGALIR";
+        pump.textContent = "🟢 ON";
+        pump.style.color = "#22c55e";
 
-
-        pump.innerHTML =
-            "🟢 ON";
-
-        pump.style.color =
-            "#22c55e";
-
-    }
-
-    else
-    {
+    } else {
 
         water.classList.remove("flow-active");
 
         indicator.classList.remove("on");
-
         indicator.classList.add("off");
+        indicator.textContent = "🔴 AIR TIDAK MENGALIR";
 
-        indicator.innerHTML =
-            "🔴 AIR TIDAK MENGALIR";
-
-
-        pump.innerHTML =
-            "🔴 OFF";
-
-        pump.style.color =
-            "#ef4444";
-
+        pump.textContent = "🔴 OFF";
+        pump.style.color = "#ef4444";
     }
-
 }
 
-
 /* ==========================================
-   MONITORING DATA
+   TAMPILAN STATUS DETEKSI
 ========================================== */
 
-async function updateMonitoring()
-{
+function updateLeakDisplay(row) {
 
-    const { data, error } =
-        await supabaseClient
+    const statusElement =
+        document.getElementById("leak-status");
 
-            .from("waterflow")
+    const durationElement =
+        document.getElementById("continuous-flow-duration");
 
-            .select(
-                "flow_rate,status"
-            )
+    const volumeElement =
+        document.getElementById("daily-volume");
 
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
+    const messageElement =
+        document.getElementById("leak-message");
 
-            .limit(1);
+    const leakStatus =
+        String(row.leak_status || "NORMAL").toUpperCase();
 
+    const duration =
+        Math.max(0, Number(row.continuous_flow_seconds) || 0);
 
-    if (error)
-    {
+    const volume =
+        Math.max(0, Number(row.total_volume) || 0);
 
-        console.error(
-            "Monitoring error:",
-            error
-        );
+    durationElement.textContent =
+        formatDuration(duration);
 
-        return;
+    volumeElement.textContent =
+        volume.toFixed(3) + " L";
 
+    if (leakStatus === "INDIKASI_KEBOCORAN") {
+
+        statusElement.textContent = "⚠️ INDIKASI KEBOCORAN";
+        statusElement.style.color = "#dc2626";
+
+        messageElement.textContent =
+            "Peringatan: aliran terdeteksi terus-menerus selama " +
+            formatDuration(duration) +
+            ". Periksa kemungkinan kebocoran atau pengisian tandon yang masih berlangsung.";
+
+        messageElement.style.background = "#fee2e2";
+        messageElement.style.color = "#991b1b";
+
+    } else if (leakStatus === "PERIKSA_VOLUME") {
+
+        statusElement.textContent = "🟠 PERIKSA VOLUME";
+        statusElement.style.color = "#d97706";
+
+        messageElement.textContent =
+            "Volume harian telah mencapai atau melebihi batas " +
+            DAILY_VOLUME_LIMIT +
+            " liter. Periksa penggunaan air dan kondisi tandon.";
+
+        messageElement.style.background = "#fef3c7";
+        messageElement.style.color = "#92400e";
+
+    } else if (
+        leakStatus === "NORMAL" &&
+        duration >= FLOW_WARNING_SECONDS
+    ) {
+
+        statusElement.textContent = "⚠️ PERIKSA ALIRAN";
+        statusElement.style.color = "#d97706";
+
+        messageElement.textContent =
+            "Durasi aliran sudah mencapai 5 menit, tetapi data status deteksi dari ESP32 masih NORMAL. Periksa kode ESP32 dan pastikan logika deteksi sudah terpasang.";
+
+        messageElement.style.background = "#fef3c7";
+        messageElement.style.color = "#92400e";
+
+    } else if (leakStatus === "NORMAL") {
+
+        statusElement.textContent = "🟢 NORMAL";
+        statusElement.style.color = "#16a34a";
+
+        messageElement.textContent =
+            "Belum ada kondisi yang memenuhi ambang peringatan berdasarkan data yang diterima.";
+
+        messageElement.style.background = "#f1f5f9";
+        messageElement.style.color = "#334155";
+
+    } else {
+
+        statusElement.textContent = "⚠️ STATUS TIDAK DIKENAL";
+        statusElement.style.color = "#d97706";
+
+        messageElement.textContent =
+            "Status deteksi yang diterima tidak dikenali: " +
+            leakStatus;
+
+        messageElement.style.background = "#fef3c7";
+        messageElement.style.color = "#92400e";
     }
-
-
-    if (
-        !data ||
-        data.length === 0
-    )
-    {
-
-        return;
-
-    }
-
-
-    const row = data[0];
-
-
-    /* Flow Rate */
-
-    const flow =
-        Number(
-            row.flow_rate
-        ) || 0;
-
-
-    document.getElementById(
-        "flow-rate-monitor"
-    ).textContent =
-        flow.toFixed(2)
-        + " L/min";
-
-
-    /* Status */
-
-    updateWaterAnimation(
-        row.status
-    );
-
 }
 
+/* ==========================================
+   FORMAT DURASI
+========================================== */
+
+function formatDuration(totalSeconds) {
+
+    const seconds = Math.floor(totalSeconds);
+
+    if (seconds < 60) {
+        return seconds + " detik";
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+        return hours + " jam " +
+            minutes + " menit " +
+            remainingSeconds + " detik";
+    }
+
+    return minutes + " menit " +
+        remainingSeconds + " detik";
+}
 
 /* ==========================================
-   LOAD PERTAMA
+   UPDATE TAMPILAN MONITORING
+========================================== */
+
+function updateMonitoringDisplay(row) {
+
+    const flow = Number(row.flow_rate) || 0;
+
+    document.getElementById("flow-rate-monitor").textContent =
+        flow.toFixed(2) + " L/min";
+
+    updateWaterAnimation(row.status);
+    updateLeakDisplay(row);
+
+    lastReceivedAt = Date.now();
+
+    document.getElementById("esp32-status").textContent =
+        "🟢 Data diterima";
+
+    document.getElementById("supabase-status").textContent =
+        "🟢 Terhubung";
+}
+
+/* ==========================================
+   AMBIL DATA TERBARU DARI SUPABASE
+========================================== */
+
+async function updateMonitoring() {
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("waterflow")
+            .select(
+                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
+            )
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (error) {
+            throw error;
+        }
+
+        document.getElementById("supabase-status").textContent =
+            "🟢 Terhubung";
+
+        if (!data || data.length === 0) {
+            document.getElementById("esp32-status").textContent =
+                "🟠 Belum ada data";
+            return;
+        }
+
+        updateMonitoringDisplay(data[0]);
+
+    } catch (error) {
+
+        console.error("Monitoring error:", error);
+
+        document.getElementById("supabase-status").textContent =
+            "🔴 Gagal membaca data";
+    }
+}
+
+/* ==========================================
+   LOAD DATA PERTAMA
 ========================================== */
 
 updateMonitoring();
 
+/* ==========================================
+   PERIKSA DATA TERAKHIR
+========================================== */
+
+setInterval(() => {
+
+    if (lastReceivedAt === null) {
+        return;
+    }
+
+    const elapsedSeconds =
+        (Date.now() - lastReceivedAt) / 1000;
+
+    if (elapsedSeconds > 30) {
+
+        document.getElementById("esp32-status").textContent =
+            "🟠 Data tidak diperbarui";
+    }
+
+}, 5000);
 
 /* ==========================================
-   REALTIME SUPABASE
+   SUPABASE REALTIME
 ========================================== */
 
 supabaseClient
-
-    .channel(
-        "monitoring-waterflow"
-    )
-
+    .channel("monitoring-waterflow")
     .on(
-
         "postgres_changes",
-
         {
-
             event: "INSERT",
-
             schema: "public",
-
             table: "waterflow"
-
         },
+        (payload) => {
 
-        payload =>
-        {
+            console.log("Data realtime:", payload.new);
 
-            console.log(
-                "Data realtime:",
-                payload.new
-            );
-
-
-            const row =
-                payload.new;
-
-
-            const flow =
-                Number(
-                    row.flow_rate
-                ) || 0;
-
-
-            document.getElementById(
-                "flow-rate-monitor"
-            ).textContent =
-                flow.toFixed(2)
-                + " L/min";
-
-
-            updateWaterAnimation(
-                row.status
-            );
-
+            updateMonitoringDisplay(payload.new);
         }
-
     )
+    .subscribe((status) => {
 
-    .subscribe(
+        console.log("Realtime status:", status);
 
-        status =>
-        {
+        if (status === "SUBSCRIBED") {
 
-            console.log(
-                "Realtime status:",
-                status
-            );
+            document.getElementById("supabase-status").textContent =
+                "🟢 Realtime aktif";
 
+        } else if (status === "CHANNEL_ERROR" ||
+                   status === "TIMED_OUT") {
+
+            document.getElementById("supabase-status").textContent =
+                "🟠 Realtime bermasalah";
         }
-
-    );
+    });
 
 </script>
 
-
 </body>
-
 </html>
