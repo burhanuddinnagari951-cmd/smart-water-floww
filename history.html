@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -5,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>History</title>
+    <title>History Monitoring Tandon</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,91 +17,136 @@
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
-
         <h2>💧 WaterFlow</h2>
 
         <a href="index.html">📊 Dashboard</a>
-
-        <a href="monitoring.html">
-            📈 Monitoring
-        </a>
-
-        <a class="active" href="history.html">
-            📋 History
-        </a>
-
-        <a href="notification.html">
-            🔔 Notification
-        </a>
-
-        <a href="settings.html">
-            ⚙️ Settings
-        </a>
-
+        <a href="monitoring.html">📈 Monitoring</a>
+        <a class="active" href="history.html">📋 History</a>
+        <a href="notification.html">🔔 Notification</a>
+        <a href="settings.html">⚙️ Settings</a>
     </aside>
-
 
     <!-- CONTENT -->
     <main class="content">
 
         <header>
-
-            <h1>📋 History</h1>
+            <h1>📋 History Monitoring Tandon</h1>
 
             <div class="badge" id="connection-status">
-                🟢 ONLINE
+                🟡 MENGHUBUNGKAN...
             </div>
-
         </header>
-
 
         <div class="panel">
 
-            <h2>📊 History Data Water Flow</h2>
+            <h2>📊 Riwayat Data WaterFlow</h2>
 
-            <p style="margin-bottom:20px;">
-                Data otomatis diambil dari ESP32 melalui Supabase.
+            <p style="margin-bottom: 8px;">
+                Riwayat pemantauan aliran dan volume air yang dikirim
+                oleh ESP32 ke database Supabase.
             </p>
 
+            <p style="margin-bottom: 20px; font-size: 14px;">
+                Waktu ditampilkan dalam WIB (UTC+7).
+                Maksimal 100 data terbaru ditampilkan.
+            </p>
 
-            <div style="overflow-x:auto;">
+            <!-- RINGKASAN -->
+            <div style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-bottom: 20px;
+            ">
+
+                <div style="
+                    padding: 14px;
+                    border-radius: 8px;
+                    background: rgba(59,130,246,0.10);
+                    flex: 1;
+                    min-width: 150px;
+                ">
+                    <div style="font-size: 13px;">Jumlah Data</div>
+                    <strong id="total-records">0</strong>
+                </div>
+
+                <div style="
+                    padding: 14px;
+                    border-radius: 8px;
+                    background: rgba(34,197,94,0.10);
+                    flex: 1;
+                    min-width: 150px;
+                ">
+                    <div style="font-size: 13px;">Status Terbaru</div>
+                    <strong id="latest-status">-</strong>
+                </div>
+
+                <div style="
+                    padding: 14px;
+                    border-radius: 8px;
+                    background: rgba(245,158,11,0.10);
+                    flex: 1;
+                    min-width: 150px;
+                ">
+                    <div style="font-size: 13px;">Deteksi Terbaru</div>
+                    <strong id="latest-leak-status">-</strong>
+                </div>
+
+            </div>
+
+            <!-- TOMBOL -->
+            <div style="margin-bottom: 15px;">
+                <button
+                    type="button"
+                    id="refresh-button"
+                    onclick="loadHistory()"
+                    style="padding: 9px 16px; cursor: pointer;"
+                >
+                    🔄 Muat Ulang Data
+                </button>
+
+                <span
+                    id="last-updated"
+                    style="font-size: 13px; margin-left: 10px;"
+                >
+                    Belum diperbarui
+                </span>
+            </div>
+
+            <!-- TABEL HISTORY -->
+            <div style="overflow-x: auto;">
 
                 <table id="historyTable">
 
                     <thead>
-
                         <tr>
-
                             <th>No</th>
-
-                            <th>Time</th>
-
+                            <th>Waktu (WIB)</th>
                             <th>Flow Rate</th>
-
-                            <th>Status</th>
-
+                            <th>Status Aliran</th>
                             <th>Total Volume</th>
-
+                            <th>Status Deteksi</th>
+                            <th>Durasi Aliran</th>
                         </tr>
-
                     </thead>
 
-
                     <tbody>
-
                         <tr>
-
-                            <td colspan="5">
+                            <td colspan="7" style="text-align: center;">
                                 Memuat data...
                             </td>
-
                         </tr>
-
                     </tbody>
 
                 </table>
 
             </div>
+
+            <p style="margin-top: 15px; font-size: 13px;">
+                Catatan: status indikasi kebocoran merupakan peringatan
+                awal berdasarkan pola aliran dan volume air, bukan
+                bukti pasti bahwa kebocoran telah terjadi.
+            </p>
 
         </div>
 
@@ -108,290 +154,288 @@
 
 </div>
 
-
 <!-- SUPABASE -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="config.js"></script>
 
-
 <script>
+    // =========================================
+    // INISIALISASI SUPABASE
+    // =========================================
 
-    // ======================================
-    // SUPABASE
-    // ======================================
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
-    const supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
+    const tbody = document.querySelector("#historyTable tbody");
+    const connectionBadge = document.getElementById("connection-status");
 
+    let isLoading = false;
 
-    // ======================================
-    // LOAD HISTORY
-    // ======================================
+    // =========================================
+    // FORMAT WAKTU WIB
+    // =========================================
 
-    async function loadHistory()
-    {
+    function formatWaktu(timestamp) {
+        if (!timestamp) return "-";
 
-        const { data, error } =
-            await supabaseClient
+        const date = new Date(timestamp);
 
-                .from("waterflow")
+        if (isNaN(date.getTime())) return "-";
 
-                .select(
-                    "flow_rate,status,total_volume,created_at"
-                )
-
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-
-                .limit(100);
-
-
-        if (error)
-        {
-
-            console.error(
-                "Gagal mengambil history:",
-                error
-            );
-
-            document.querySelector(
-                "#historyTable tbody"
-            ).innerHTML = `
-
-                <tr>
-
-                    <td colspan="5">
-                        ❌ Gagal mengambil data
-                    </td>
-
-                </tr>
-
-            `;
-
-            return;
-
-        }
-
-
-        renderHistory(data);
-
+        return date.toLocaleString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        });
     }
 
+    // =========================================
+    // FORMAT DURASI
+    // =========================================
 
-    // ======================================
-    // TAMPILKAN HISTORY
-    // ======================================
+    function formatDurasi(seconds) {
+        const totalSeconds = Math.max(0, Number(seconds) || 0);
 
-    function renderHistory(data)
-    {
+        const jam = Math.floor(totalSeconds / 3600);
+        const menit = Math.floor((totalSeconds % 3600) / 60);
+        const detik = Math.floor(totalSeconds % 60);
 
-        const tbody =
-            document.querySelector(
-                "#historyTable tbody"
-            );
-
-
-        if (!data || data.length === 0)
-        {
-
-            tbody.innerHTML = `
-
-                <tr>
-
-                    <td colspan="5">
-                        Belum ada data
-                    </td>
-
-                </tr>
-
-            `;
-
-            return;
-
+        if (jam > 0) {
+            return `${jam} jam ${menit} menit ${detik} detik`;
         }
 
+        if (menit > 0) {
+            return `${menit} menit ${detik} detik`;
+        }
+
+        return `${detik} detik`;
+    }
+
+    // =========================================
+    // FORMAT STATUS ALIRAN
+    // =========================================
+
+    function formatStatusAliran(status) {
+        const value = String(status || "OFF").toUpperCase();
+
+        if (value === "ON") {
+            return `
+                <span style="color: #22c55e; font-weight: bold;">
+                    🟢 ON
+                </span>
+            `;
+        }
+
+        return `
+            <span style="color: #ef4444; font-weight: bold;">
+                🔴 OFF
+            </span>
+        `;
+    }
+
+    // =========================================
+    // FORMAT STATUS DETEKSI
+    // =========================================
+
+    function formatStatusDeteksi(status) {
+        const value = String(status || "NORMAL").toUpperCase();
+
+        if (value === "INDIKASI_KEBOCORAN") {
+            return `
+                <span style="color: #ef4444; font-weight: bold;">
+                    ⚠️ Indikasi Kebocoran
+                </span>
+            `;
+        }
+
+        if (value === "PERIKSA_VOLUME") {
+            return `
+                <span style="color: #f59e0b; font-weight: bold;">
+                    ⚠️ Periksa Volume
+                </span>
+            `;
+        }
+
+        return `
+            <span style="color: #22c55e; font-weight: bold;">
+                ✅ Normal
+            </span>
+        `;
+    }
+
+    // =========================================
+    // MEMUAT DATA HISTORY
+    // =========================================
+
+    async function loadHistory() {
+        if (isLoading) return;
+
+        isLoading = true;
+
+        const refreshButton = document.getElementById("refresh-button");
+        refreshButton.disabled = true;
+        refreshButton.textContent = "⏳ Memuat...";
+
+        try {
+            const { data, error } = await supabaseClient
+                .from("waterflow")
+                .select(
+                    "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
+                )
+                .order("created_at", { ascending: false })
+                .limit(100);
+
+            if (error) {
+                throw error;
+            }
+
+            renderHistory(data || []);
+
+            document.getElementById("last-updated").textContent =
+                "Diperbarui: " + formatWaktu(new Date().toISOString());
+
+        } catch (error) {
+            console.error("Gagal mengambil history:", error);
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center;">
+                        ❌ Gagal mengambil data dari Supabase.
+                        Periksa koneksi internet, config.js,
+                        dan struktur kolom database.
+                    </td>
+                </tr>
+            `;
+
+        } finally {
+            isLoading = false;
+            refreshButton.disabled = false;
+            refreshButton.textContent = "🔄 Muat Ulang Data";
+        }
+    }
+
+    // =========================================
+    // MENAMPILKAN DATA HISTORY
+    // =========================================
+
+    function renderHistory(data) {
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center;">
+                        Belum ada data riwayat.
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("total-records").textContent = "0";
+            document.getElementById("latest-status").textContent = "-";
+            document.getElementById("latest-leak-status").textContent = "-";
+
+            return;
+        }
+
+        document.getElementById("total-records").textContent = data.length;
+
+        document.getElementById("latest-status").textContent =
+            String(data[0].status || "OFF").toUpperCase();
+
+        const latestLeakStatus =
+            String(data[0].leak_status || "NORMAL").toUpperCase();
+
+        const leakLabels = {
+            NORMAL: "Normal",
+            INDIKASI_KEBOCORAN: "Indikasi Kebocoran",
+            PERIKSA_VOLUME: "Periksa Volume"
+        };
+
+        document.getElementById("latest-leak-status").textContent =
+            leakLabels[latestLeakStatus] || latestLeakStatus;
 
         tbody.innerHTML = "";
 
+        data.forEach((item, index) => {
+            const flow = Number(item.flow_rate) || 0;
+            const volume = Number(item.total_volume) || 0;
+            const duration = Number(item.continuous_flow_seconds) || 0;
 
-        data.forEach(
-            (item, index) =>
-            {
+            const row = document.createElement("tr");
 
-                const waktu =
-                    new Date(
-                        item.created_at
-                    ).toLocaleString(
-                        "id-ID"
-                    );
+            const values = [
+                index + 1,
+                formatWaktu(item.created_at),
+                flow.toFixed(2) + " L/min",
+                null,
+                volume.toFixed(3) + " L",
+                null,
+                formatDurasi(duration)
+            ];
 
+            values.forEach((value, columnIndex) => {
+                const cell = document.createElement("td");
 
-                const flow =
-                    Number(
-                        item.flow_rate
-                    ) || 0;
-
-
-                const volume =
-                    Number(
-                        item.total_volume
-                    ) || 0;
-
-
-                let statusHTML;
-
-
-                if (
-                    String(
-                        item.status
-                    ).toUpperCase()
-                    === "ON"
-                )
-                {
-
-                    statusHTML =
-                        `<span style="color:#22c55e;">
-                            🟢 ON
-                        </span>`;
-
-                }
-                else
-                {
-
-                    statusHTML =
-                        `<span style="color:#ef4444;">
-                            🔴 OFF
-                        </span>`;
-
+                if (columnIndex === 3) {
+                    cell.innerHTML = formatStatusAliran(item.status);
+                } else if (columnIndex === 5) {
+                    cell.innerHTML = formatStatusDeteksi(item.leak_status);
+                } else {
+                    cell.textContent = value;
                 }
 
+                row.appendChild(cell);
+            });
 
-                tbody.innerHTML += `
-
-                    <tr>
-
-                        <td>
-                            ${index + 1}
-                        </td>
-
-                        <td>
-                            ${waktu}
-                        </td>
-
-                        <td>
-                            ${flow.toFixed(2)}
-                            L/min
-                        </td>
-
-                        <td>
-                            ${statusHTML}
-                        </td>
-
-                        <td>
-                            ${volume.toFixed(3)}
-                            L
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-        );
-
+            tbody.appendChild(row);
+        });
     }
 
-
-    // ======================================
-    // LOAD DATA PERTAMA
-    // ======================================
-
-    loadHistory();
-
-
-    // ======================================
-    // REALTIME
-    // ======================================
+    // =========================================
+    // SUPABASE REALTIME
+    // =========================================
 
     supabaseClient
-
-        .channel(
-            "history-waterflow"
-        )
-
+        .channel("history-waterflow-realtime")
         .on(
-
             "postgres_changes",
-
             {
                 event: "INSERT",
-
                 schema: "public",
-
                 table: "waterflow"
-
             },
+            (payload) => {
+                console.log("Data history baru:", payload.new);
 
-            payload =>
-            {
-
-                console.log(
-                    "History data baru:",
-                    payload.new
-                );
-
-
-                // Ambil ulang data
-                // agar urutan tetap benar
-
+                // Ambil ulang data supaya urutannya tetap terbaru.
                 loadHistory();
-
             }
-
         )
+        .subscribe((status) => {
+            console.log("Status Realtime:", status);
 
-        .subscribe(
-
-            status =>
-            {
-
-                console.log(
-                    "History Realtime:",
-                    status
-                );
-
-
-                const badge =
-                    document.getElementById(
-                        "connection-status"
-                    );
-
-
-                if (
-                    status === "SUBSCRIBED"
-                )
-                {
-
-                    badge.innerHTML =
-                        "🟢 REALTIME";
-
-                }
-
+            if (status === "SUBSCRIBED") {
+                connectionBadge.textContent = "🟢 REALTIME";
+            } else if (status === "CHANNEL_ERROR" ||
+                       status === "TIMED_OUT") {
+                connectionBadge.textContent = "🔴 REALTIME ERROR";
+            } else {
+                connectionBadge.textContent = "🟡 MENGHUBUNGKAN...";
             }
+        });
 
-        );
+    // =========================================
+    // JALANKAN SAAT HALAMAN DIBUKA
+    // =========================================
 
+    loadHistory();
 </script>
 
 </body>
-
 </html>
+```
