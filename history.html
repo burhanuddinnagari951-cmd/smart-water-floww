@@ -1,16 +1,78 @@
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History Monitoring Tandon</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .history-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: end;
+            margin: 18px 0;
+        }
+
+        .history-controls .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-controls input,
+        .history-controls select,
+        .history-controls button,
+        .pagination button {
+            padding: 9px 12px;
+            border-radius: 6px;
+            border: 1px solid #64748b;
+            font: inherit;
+        }
+
+        .history-controls button,
+        .pagination button {
+            cursor: pointer;
+        }
+
+        .history-controls button:disabled,
+        .pagination button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .download-note {
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .history-controls .field {
+                width: 100%;
+            }
+
+            .history-controls input,
+            .history-controls select,
+            .history-controls button {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
 <div class="layout">
 
     <aside class="sidebar">
@@ -23,7 +85,6 @@
     </aside>
 
     <main class="content">
-
         <header>
             <h1>📋 History Monitoring Tandon</h1>
             <div class="badge" id="connection-status">
@@ -32,96 +93,128 @@
         </header>
 
         <div class="panel">
-
             <h2>📊 Riwayat Data WaterFlow</h2>
 
-            <p style="margin-bottom: 8px;">
+            <p>
                 Riwayat pemantauan aliran dan volume air yang dikirim
                 oleh ESP32 ke database Supabase.
             </p>
 
-            <p style="margin-bottom: 20px; font-size: 14px;">
-                Waktu ditampilkan dalam WIB (UTC+7).
-                Maksimal 100 data terbaru ditampilkan.
-                Data diperbarui otomatis setiap 1 jam.
+            <p style="font-size:14px; margin-top:10px;">
+                Waktu dalam WIB (UTC+7). Tabel menampilkan 100 data
+                per halaman dan diperbarui otomatis setiap 5 detik.
             </p>
 
             <!-- RINGKASAN -->
             <div style="
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-bottom: 20px;
+                display:flex;
+                flex-wrap:wrap;
+                gap:12px;
+                margin:20px 0;
             ">
-
                 <div style="
-                    padding: 14px;
-                    border-radius: 8px;
-                    background: rgba(59,130,246,0.10);
-                    flex: 1;
-                    min-width: 150px;
+                    padding:14px;
+                    border-radius:8px;
+                    background:rgba(59,130,246,0.10);
+                    flex:1;
+                    min-width:150px;
                 ">
-                    <div style="font-size: 13px;">Jumlah Data</div>
+                    <div style="font-size:13px;">Jumlah Data di Halaman</div>
                     <strong id="total-records">0</strong>
                 </div>
 
                 <div style="
-                    padding: 14px;
-                    border-radius: 8px;
-                    background: rgba(34,197,94,0.10);
-                    flex: 1;
-                    min-width: 150px;
+                    padding:14px;
+                    border-radius:8px;
+                    background:rgba(34,197,94,0.10);
+                    flex:1;
+                    min-width:150px;
                 ">
-                    <div style="font-size: 13px;">Status Terbaru</div>
+                    <div style="font-size:13px;">Status Terbaru</div>
                     <strong id="latest-status">-</strong>
                 </div>
 
                 <div style="
-                    padding: 14px;
-                    border-radius: 8px;
-                    background: rgba(245,158,11,0.10);
-                    flex: 1;
-                    min-width: 150px;
+                    padding:14px;
+                    border-radius:8px;
+                    background:rgba(245,158,11,0.10);
+                    flex:1;
+                    min-width:150px;
                 ">
-                    <div style="font-size: 13px;">Deteksi Terbaru</div>
+                    <div style="font-size:13px;">Deteksi Terbaru</div>
                     <strong id="latest-leak-status">-</strong>
                 </div>
-
             </div>
 
-            <!-- TOMBOL REFRESH -->
-            <div style="margin-bottom: 15px;">
+            <!-- FILTER DOWNLOAD -->
+            <h3>📥 Download Riwayat Data</h3>
 
+            <div class="history-controls">
+                <div class="field">
+                    <label for="period">Periode data</label>
+                    <select id="period">
+                        <option value="daily">Harian</option>
+                        <option value="weekly">Mingguan (7 hari)</option>
+                        <option value="monthly">Bulanan</option>
+                        <option value="custom">Rentang tanggal</option>
+                        <option value="all">Semua data</option>
+                    </select>
+                </div>
+
+                <div class="field" id="single-date-field">
+                    <label for="selected-date">Tanggal</label>
+                    <input type="date" id="selected-date">
+                </div>
+
+                <div class="field" id="start-date-field" hidden>
+                    <label for="start-date">Tanggal awal</label>
+                    <input type="date" id="start-date">
+                </div>
+
+                <div class="field" id="end-date-field" hidden>
+                    <label for="end-date">Tanggal akhir</label>
+                    <input type="date" id="end-date">
+                </div>
+
+                <button type="button" id="download-button">
+                    ⬇️ Download CSV
+                </button>
+            </div>
+
+            <p id="download-status" class="download-note">
+                File CSV dapat dibuka menggunakan Microsoft Excel.
+            </p>
+
+            <hr style="margin:20px 0; opacity:0.2;">
+
+            <!-- REFRESH -->
+            <div style="margin-bottom:15px;">
                 <button
                     type="button"
                     id="refresh-button"
-                    onclick="loadHistory()"
-                    style="padding: 9px 16px; cursor: pointer;"
+                    style="padding:9px 16px; cursor:pointer;"
                 >
                     🔄 Muat Ulang Data
                 </button>
 
                 <span
                     id="last-updated"
-                    style="font-size: 13px; margin-left: 10px;"
+                    style="font-size:13px; margin-left:10px;"
                 >
                     Belum diperbarui
                 </span>
-
             </div>
 
-            <!-- TABEL HISTORY -->
-            <div style="overflow-x: auto;">
-
+            <!-- TABEL -->
+            <div style="overflow-x:auto;">
                 <table id="historyTable">
-
                     <thead>
                         <tr>
                             <th>No</th>
                             <th>Waktu (WIB)</th>
                             <th>Flow Rate</th>
                             <th>Status Aliran</th>
-                            <th>Total Volume</th>
+                            <th>Total Volume (L)</th>
                             <th>Status Deteksi</th>
                             <th>Durasi Aliran</th>
                         </tr>
@@ -129,37 +222,44 @@
 
                     <tbody>
                         <tr>
-                            <td colspan="7" style="text-align: center;">
+                            <td colspan="7" style="text-align:center;">
                                 Memuat data...
                             </td>
                         </tr>
                     </tbody>
-
                 </table>
-
             </div>
 
-            <p style="margin-top: 15px; font-size: 13px;">
+            <!-- PAGINATION -->
+            <div class="pagination">
+                <button type="button" id="previous-button">
+                    ← Sebelumnya
+                </button>
+
+                <span id="page-info">Halaman 1</span>
+
+                <button type="button" id="next-button">
+                    Berikutnya →
+                </button>
+            </div>
+
+            <p style="font-size:13px; margin-top:15px;">
                 Catatan: status indikasi kebocoran merupakan peringatan
-                awal berdasarkan pola aliran dan volume air, bukan
-                bukti pasti bahwa kebocoran telah terjadi.
+                awal berdasarkan pola aliran dan volume air, bukan bukti
+                pasti bahwa kebocoran telah terjadi.
             </p>
-
         </div>
-
     </main>
-
 </div>
 
-<!-- LIBRARY SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- KONFIGURASI SUPABASE -->
 <script src="config.js"></script>
 
 <script>
+"use strict";
+
 // ========================================
-// INISIALISASI SUPABASE
+// KONFIGURASI
 // ========================================
 
 const supabaseClient = window.supabase.createClient(
@@ -170,12 +270,32 @@ const supabaseClient = window.supabase.createClient(
 const tbody = document.querySelector("#historyTable tbody");
 const connectionBadge = document.getElementById("connection-status");
 
+const PAGE_SIZE = 100;
+const REFRESH_INTERVAL = 5000;
+
+let currentPage = 0;
 let isLoading = false;
-
+let refreshTimer = null;
 
 // ========================================
-// FORMAT WAKTU WIB
+// TANGGAL WIB
 // ========================================
+
+function getWIBDateString(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).formatToParts(date);
+
+    const values = {};
+    parts.forEach(part => {
+        values[part.type] = part.value;
+    });
+
+    return `${values.year}-${values.month}-${values.day}`;
+}
 
 function formatWaktu(timestamp) {
     if (!timestamp) return "-";
@@ -205,33 +325,16 @@ function formatWaktu(timestamp) {
     }).format(date);
 }
 
-
-// ========================================
-// FORMAT DURASI ALIRAN
-// ========================================
-
 function formatDurasi(seconds) {
-    const totalSeconds = Math.max(0, Number(seconds) || 0);
+    const total = Math.max(0, Number(seconds) || 0);
+    const jam = Math.floor(total / 3600);
+    const menit = Math.floor((total % 3600) / 60);
+    const detik = Math.floor(total % 60);
 
-    const jam = Math.floor(totalSeconds / 3600);
-    const menit = Math.floor((totalSeconds % 3600) / 60);
-    const detik = Math.floor(totalSeconds % 60);
-
-    if (jam > 0) {
-        return `${jam} jam ${menit} menit ${detik} detik`;
-    }
-
-    if (menit > 0) {
-        return `${menit} menit ${detik} detik`;
-    }
-
+    if (jam > 0) return `${jam} jam ${menit} menit ${detik} detik`;
+    if (menit > 0) return `${menit} menit ${detik} detik`;
     return `${detik} detik`;
 }
-
-
-// ========================================
-// FORMAT STATUS ALIRAN
-// ========================================
 
 function formatStatusAliran(status) {
     const value = String(status || "OFF").toUpperCase();
@@ -242,11 +345,6 @@ function formatStatusAliran(status) {
 
     return '<span style="color:#ef4444;font-weight:bold;">🔴 OFF</span>';
 }
-
-
-// ========================================
-// FORMAT STATUS DETEKSI
-// ========================================
 
 function formatStatusDeteksi(status) {
     const value = String(status || "NORMAL").toUpperCase();
@@ -262,50 +360,58 @@ function formatStatusDeteksi(status) {
     return '<span style="color:#22c55e;font-weight:bold;">✅ Normal</span>';
 }
 
-
 // ========================================
-// MENAMPILKAN DATA HISTORY
+// TAMPILKAN TABEL
 // ========================================
 
-function renderHistory(data) {
+function renderHistory(data, count) {
     document.getElementById("total-records").textContent = data.length;
 
     if (data.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align:center;">
-                    Belum ada data pada tabel waterflow.
+                    Tidak ada data pada halaman ini.
                 </td>
             </tr>
         `;
-
-        document.getElementById("latest-status").textContent = "-";
-        document.getElementById("latest-leak-status").textContent = "-";
-        return;
+    } else {
+        tbody.innerHTML = data.map((item, index) => `
+            <tr>
+                <td>${currentPage * PAGE_SIZE + index + 1}</td>
+                <td>${formatWaktu(item.created_at)}</td>
+                <td>${Number(item.flow_rate || 0).toFixed(2)} L/min</td>
+                <td>${formatStatusAliran(item.status)}</td>
+                <td>${Number(item.total_volume || 0).toFixed(3)} L</td>
+                <td>${formatStatusDeteksi(item.leak_status)}</td>
+                <td>${formatDurasi(item.continuous_flow_seconds)}</td>
+            </tr>
+        `).join("");
     }
 
-    document.getElementById("latest-status").textContent =
-        data[0].status || "OFF";
+    document.getElementById("page-info").textContent =
+        `Halaman ${currentPage + 1} | Total data: ${count}`;
 
-    document.getElementById("latest-leak-status").textContent =
-        data[0].leak_status || "NORMAL";
+    document.getElementById("previous-button").disabled =
+        currentPage === 0;
 
-    tbody.innerHTML = data.map((item, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${formatWaktu(item.created_at)}</td>
-            <td>${Number(item.flow_rate || 0).toFixed(2)} L/min</td>
-            <td>${formatStatusAliran(item.status)}</td>
-            <td>${Number(item.total_volume || 0).toFixed(3)} L</td>
-            <td>${formatStatusDeteksi(item.leak_status)}</td>
-            <td>${formatDurasi(item.continuous_flow_seconds)}</td>
-        </tr>
-    `).join("");
+    document.getElementById("next-button").disabled =
+        (currentPage + 1) * PAGE_SIZE >= count;
+
+    if (currentPage === 0 && data.length > 0) {
+        document.getElementById("latest-status").textContent =
+            data[0].status || "OFF";
+
+        document.getElementById("latest-leak-status").textContent =
+            data[0].leak_status || "NORMAL";
+    } else if (count === 0) {
+        document.getElementById("latest-status").textContent = "-";
+        document.getElementById("latest-leak-status").textContent = "-";
+    }
 }
 
-
 // ========================================
-// MEMUAT DATA DARI SUPABASE
+// MEMUAT SATU HALAMAN DATA
 // ========================================
 
 async function loadHistory() {
@@ -314,24 +420,25 @@ async function loadHistory() {
     isLoading = true;
 
     const refreshButton = document.getElementById("refresh-button");
-
     refreshButton.disabled = true;
-    refreshButton.textContent = "⏳ Memuat...";
     connectionBadge.textContent = "🟡 MEMUAT DATA...";
 
     try {
-        const { data, error } = await supabaseClient
+        const from = currentPage * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+
+        const { data, error, count } = await supabaseClient
             .from("waterflow")
             .select(
-                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
+                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at",
+                { count: "exact" }
             )
             .order("created_at", { ascending: false })
-            .limit(100);
+            .range(from, to);
 
         if (error) throw error;
 
-        renderHistory(data || []);
-
+        renderHistory(data || [], count || 0);
         connectionBadge.textContent = "🟢 TERHUBUNG";
 
         document.getElementById("last-updated").textContent =
@@ -346,7 +453,6 @@ async function loadHistory() {
 
     } catch (error) {
         console.error("Gagal memuat History:", error);
-
         connectionBadge.textContent = "🔴 GAGAL MEMUAT";
 
         document.getElementById("last-updated").textContent =
@@ -355,34 +461,254 @@ async function loadHistory() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align:center;">
-                    Gagal memuat data dari Supabase.
-                    Periksa Console browser untuk detail error.
+                    Gagal memuat data. Periksa Console browser.
                 </td>
             </tr>
         `;
-
     } finally {
         isLoading = false;
         refreshButton.disabled = false;
-        refreshButton.textContent = "🔄 Muat Ulang Data";
     }
 }
 
+// ========================================
+// PAGINATION
+// ========================================
+
+document.getElementById("refresh-button").addEventListener("click", () => {
+    loadHistory();
+});
+
+document.getElementById("previous-button").addEventListener("click", () => {
+    if (currentPage > 0) {
+        currentPage--;
+        loadHistory();
+    }
+});
+
+document.getElementById("next-button").addEventListener("click", () => {
+    currentPage++;
+    loadHistory();
+});
 
 // ========================================
-// JALANKAN SAAT HALAMAN DIBUKA
+// FILTER DOWNLOAD
+// ========================================
+
+const periodSelect = document.getElementById("period");
+const singleDateField = document.getElementById("single-date-field");
+const startDateField = document.getElementById("start-date-field");
+const endDateField = document.getElementById("end-date-field");
+
+const selectedDateInput = document.getElementById("selected-date");
+const startDateInput = document.getElementById("start-date");
+const endDateInput = document.getElementById("end-date");
+
+const todayWIB = getWIBDateString();
+
+selectedDateInput.value = todayWIB;
+endDateInput.value = todayWIB;
+
+function updatePeriodFields() {
+    const period = periodSelect.value;
+
+    singleDateField.hidden = !["daily", "weekly", "monthly"].includes(period);
+    startDateField.hidden = period !== "custom";
+    endDateField.hidden = period !== "custom";
+}
+
+periodSelect.addEventListener("change", updatePeriodFields);
+updatePeriodFields();
+
+function getDownloadRange() {
+    const period = periodSelect.value;
+    let start;
+    let end;
+
+    if (period === "all") {
+        return { start: null, end: null, label: "Semua_Data" };
+    }
+
+    if (period === "custom") {
+        const startValue = startDateInput.value;
+        const endValue = endDateInput.value;
+
+        if (!startValue || !endValue) {
+            throw new Error("Pilih tanggal awal dan tanggal akhir.");
+        }
+
+        if (startValue > endValue) {
+            throw new Error("Tanggal awal tidak boleh melebihi tanggal akhir.");
+        }
+
+        start = startValue;
+        end = endValue;
+
+    } else {
+        const chosen = selectedDateInput.value;
+
+        if (!chosen) {
+            throw new Error("Pilih tanggal terlebih dahulu.");
+        }
+
+        if (period === "daily") {
+            start = chosen;
+            end = chosen;
+
+        } else if (period === "weekly") {
+            const date = new Date(chosen + "T12:00:00Z");
+            date.setUTCDate(date.getUTCDate() - 6);
+            start = date.toISOString().slice(0, 10);
+            end = chosen;
+
+        } else if (period === "monthly") {
+            start = chosen.slice(0, 7) + "-01";
+
+            const [year, month] = chosen.split("-").map(Number);
+            const lastDay = new Date(Date.UTC(year, month, 0))
+                .getUTCDate();
+
+            end = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+        }
+    }
+
+    return {
+        start: start + "T00:00:00+07:00",
+        end: end + "T23:59:59.999+07:00",
+        label: `${start.slice(0, 10)}_sampai_${end.slice(0, 10)}`
+    };
+}
+
+// ========================================
+// DOWNLOAD CSV DARI SUPABASE
+// Mengambil data bertahap agar tidak berhenti di 100 baris.
+// ========================================
+
+async function fetchAllForDownload(start, end) {
+    const batchSize = 1000;
+    let offset = 0;
+    let allData = [];
+
+    while (true) {
+        let query = supabaseClient
+            .from("waterflow")
+            .select(
+                "flow_rate,status,total_volume,leak_status,continuous_flow_seconds,created_at"
+            )
+            .order("created_at", { ascending: true })
+            .range(offset, offset + batchSize - 1);
+
+        if (start) query = query.gte("created_at", start);
+        if (end) query = query.lte("created_at", end);
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        allData = allData.concat(data || []);
+
+        if (!data || data.length < batchSize) break;
+
+        offset += batchSize;
+    }
+
+    return allData;
+}
+
+function csvEscape(value) {
+    const text = String(value ?? "");
+    return '"' + text.replace(/"/g, '""') + '"';
+}
+
+async function downloadCSV() {
+    const button = document.getElementById("download-button");
+    const status = document.getElementById("download-status");
+
+    button.disabled = true;
+    button.textContent = "⏳ Menyiapkan CSV...";
+
+    try {
+        const range = getDownloadRange();
+
+        status.textContent = "Mengambil data dari Supabase...";
+
+        const data = await fetchAllForDownload(range.start, range.end);
+
+        if (data.length === 0) {
+            status.textContent = "Tidak ada data pada periode yang dipilih.";
+            return;
+        }
+
+        const headers = [
+            "No",
+            "Waktu (WIB)",
+            "Flow Rate (L/min)",
+            "Status Aliran",
+            "Total Volume (L)",
+            "Status Deteksi",
+            "Durasi Aliran (detik)"
+        ];
+
+        const rows = data.map((item, index) => [
+            index + 1,
+            formatWaktu(item.created_at),
+            Number(item.flow_rate || 0),
+            item.status || "OFF",
+            Number(item.total_volume || 0),
+            item.leak_status || "NORMAL",
+            Number(item.continuous_flow_seconds || 0)
+        ]);
+
+        const csv = "\uFEFF" + [
+            headers.map(csvEscape).join(";"),
+            ...rows.map(row => row.map(csvEscape).join(";"))
+        ].join("\r\n");
+
+        const blob = new Blob([csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `WaterFlow_History_${range.label}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+        status.textContent =
+            `Berhasil mengunduh ${data.length} baris data.`;
+
+    } catch (error) {
+        console.error("Gagal download CSV:", error);
+        status.textContent = error.message || "Download gagal.";
+    } finally {
+        button.disabled = false;
+        button.textContent = "⬇️ Download CSV";
+    }
+}
+
+document.getElementById("download-button")
+    .addEventListener("click", downloadCSV);
+
+// ========================================
+// UPDATE OTOMATIS SETIAP 5 DETIK
 // ========================================
 
 loadHistory();
 
-
-// ========================================
-// REFRESH OTOMATIS SETIAP 1 JAM
-// ========================================
-
-setInterval(loadHistory, 60 * 60 * 1000);
+refreshTimer = setInterval(() => {
+    // Jangan mengganggu pengguna ketika sedang membuka halaman lama.
+    // Refresh otomatis hanya ketika halaman pertama sedang ditampilkan.
+    if (currentPage === 0) {
+        loadHistory();
+    }
+}, REFRESH_INTERVAL);
 
 </script>
-
 </body>
 </html>
